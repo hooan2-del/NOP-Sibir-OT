@@ -1,0 +1,3638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стажировочный лист, Распоряжение и Приказ</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #2c3e50;
+            --success-color: #27ae60;
+            --info-color: #3498db;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --text-color: #333;
+            --border-color: #ddd;
+            --light-bg: #f9f9f9;
+            --shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            padding: 20px;
+            line-height: 1.4;
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light-bg);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: white;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .notification-success {
+            background-color: var(--success-color);
+        }
+        
+        .notification-error {
+            background-color: var(--error-color);
+        }
+        
+        .notification-info {
+            background-color: var(--info-color);
+        }
+        
+        .notification-warning {
+            background-color: var(--warning-color);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .tabs-container {
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-button {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: var(--transition);
+            flex: 1;
+            min-width: 160px;
+            max-width: 200px;
+        }
+        
+        .tab-button:hover {
+            background-color: #3a5a8a;
+        }
+        
+        .tab-button.active {
+            background-color: var(--secondary-color);
+        }
+        
+        .document-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px 50px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            position: relative;
+            display: none;
+        }
+        
+        .document-container.active {
+            display: block;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+        }
+        
+        .document-title {
+            font-size: 22px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        
+        .document-subtitle {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .location-date {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            font-size: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .document-date-input {
+            border: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: inherit;
+            outline: none;
+            padding: 2px 5px;
+            border-bottom: 1px dashed var(--primary-color);
+            cursor: pointer;
+            text-align: center;
+            width: 120px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 15px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 2px;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        
+        .info-label {
+            flex: 0 0 55%;
+            font-weight: bold;
+            min-width: 250px;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            flex: 1;
+            padding-left: 8px;
+            min-height: 20px;
+            min-width: 200px;
+            font-size: 14px;
+        }
+        
+        .editable-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            padding: 2px 5px;
+        }
+        
+        .editable-input.has-error {
+            border-color: var(--error-color);
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .editable-select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            padding: 2px 5px;
+            cursor: pointer;
+        }
+        
+        .date-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            padding: 2px 5px;
+            cursor: pointer;
+        }
+        
+        .date-range-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        
+        .date-range-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            padding: 2px 5px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .schedule-mode {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .schedule-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        
+        .schedule-option input[type="radio"] {
+            cursor: pointer;
+        }
+        
+        .schedule-option label {
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .internship-dates-display {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            border-left: 2px solid var(--primary-color);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .order-header {
+            margin-bottom: 25px;
+        }
+        
+        .company-info {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        
+        .company-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            text-align: left;
+            line-height: 1.2;
+        }
+        
+        .company-address {
+            font-size: 12px;
+            text-align: left;
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+        
+        .order-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        .order-number-date {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            font-size: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .order-content {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .order-item {
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+        
+        .order-item-number {
+            font-weight: bold;
+        }
+        
+        .order-signature-container {
+            margin-top: 30px;
+        }
+        
+        .order-signature {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        
+        .signature-position {
+            text-align: left;
+            font-size: 14px;
+            font-weight: bold;
+            font-style: italic;
+        }
+        
+        .signature-name {
+            text-align: right;
+            font-size: 14px;
+        }
+        
+        .acquainted-list {
+            margin-top: 35px;
+        }
+        
+        .acquainted-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 3px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .acquainted-position {
+            font-weight: normal;
+            min-width: 180px;
+            font-size: 13px;
+        }
+        
+        .acquainted-signature {
+            min-width: 180px;
+            text-align: center;
+            font-size: 13px;
+        }
+        
+        .order-main-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .order-subtitle {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .order-basis {
+            font-style: italic;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            padding-left: 15px;
+            font-size: 13px;
+        }
+        
+        .auto-update-notice {
+            background-color: #e8f4fd;
+            border: 1px solid #b6d7f2;
+            padding: 8px;
+            margin-bottom: 12px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: var(--secondary-color);
+            display: none;
+        }
+        
+        .auto-update-notice.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 11px;
+            margin-top: 3px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .add-supervisor-button {
+            background-color: var(--warning-color);
+            margin-top: 8px;
+            font-size: 13px;
+            padding: 8px 15px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .add-supervisor-button:hover {
+            opacity: 0.9;
+        }
+        
+        .supervisor-section {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            border-left: 2px solid var(--warning-color);
+        }
+        
+        .supervisor-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .supervisor-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--warning-color);
+        }
+        
+        .remove-supervisor-btn {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .remove-supervisor-btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* Стили для кнопки редактирования ФИО */
+        .edit-name-button {
+            background-color: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            margin-top: 5px;
+        }
+        
+        .edit-name-button:hover {
+            opacity: 0.9;
+        }
+        
+        .edit-name-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f7ff;
+            border-radius: 4px;
+            border: 1px solid var(--info-color);
+        }
+        
+        .edit-name-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .edit-name-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .edit-name-save {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .edit-name-cancel {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .name-display-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .name-display-text {
+            min-height: 20px;
+            min-width: 200px;
+            padding: 2px 5px;
+            border-bottom: 1px dashed transparent;
+        }
+        
+        .name-display-text.editable {
+            border-bottom: 1px dashed var(--info-color);
+            cursor: pointer;
+        }
+        
+        .name-display-text.editable:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        /* Стили для кнопки очистки кэша */
+        .clear-cache-button {
+            background-color: var(--error-color);
+            margin-top: 8px;
+            font-size: 13px;
+            padding: 8px 15px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .clear-cache-button:hover {
+            opacity: 0.9;
+        }
+        
+        /* Скрыть префиксы при печати */
+        .no-print-prefix {
+            display: none !important;
+        }
+        
+        /* Стили для печатных значений */
+        .print-value {
+            display: none;
+        }
+        
+        /* Сжатые стили для Стажировочного листа */
+        .compact-section {
+            margin-bottom: 12px !important;
+        }
+        
+        .compact-info-row {
+            margin-bottom: 4px !important;
+            min-height: 18px !important;
+        }
+        
+        .compact-section-title {
+            font-size: 13px !important;
+            margin-bottom: 3px !important;
+            padding-bottom: 1px !important;
+        }
+        
+        .compact-supervisor-section {
+            margin-top: 8px !important;
+            padding: 6px !important;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-button {
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .document-container {
+                padding: 20px;
+            }
+            
+            .info-row {
+                flex-direction: column;
+            }
+            
+            .info-label, .info-value {
+                flex: 1 0 100%;
+                width: 100%;
+            }
+            
+            .info-label {
+                margin-bottom: 3px;
+            }
+            
+            .location-date, .order-number-date {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .acquainted-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .acquainted-signature {
+                min-width: 100%;
+                text-align: left;
+                margin-top: 3px;
+            }
+            
+            .order-signature {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .signature-name {
+                text-align: left;
+            }
+            
+            .date-range-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .date-range-input {
+                width: 100%;
+            }
+            
+            .schedule-mode {
+                flex-direction: column;
+                gap: 6px;
+            }
+            
+            .supervisor-section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .name-display-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .edit-name-button {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+                font-size: 11px !important;
+                line-height: 1.15 !important;
+            }
+            
+            .tabs, .no-print, .auto-update-notice, .notification, 
+            .loading-overlay, .error-message,
+            .schedule-mode, .date-range-container input[type="date"],
+            .document-date-input, .add-supervisor-button, .remove-supervisor-btn,
+            .supervisor-section-header, .supervisor-title,
+            .edit-name-button, .edit-name-container, .clear-cache-button {
+                display: none !important;
+            }
+            
+            .document-container {
+                box-shadow: none;
+                border: none;
+                padding: 15px 20px !important;
+                max-width: 100%;
+                display: block !important;
+                page-break-after: always;
+                margin: 0;
+            }
+            
+            .document-container:last-child {
+                page-break-after: auto;
+            }
+            
+            .editable-input, .editable-select, .date-input, .date-range-input {
+                border: none;
+                padding: 0;
+                background: transparent;
+                font-size: 11px !important;
+            }
+            
+            .internship-dates-display {
+                background-color: transparent;
+                border-left: none;
+                padding: 0;
+                font-size: 10px !important;
+                margin-top: 3px;
+                line-height: 1.1 !important;
+            }
+            
+            .supervisor-section {
+                background-color: transparent;
+                border-left: none;
+                padding: 0;
+                margin-top: 6px;
+            }
+            
+            .info-row {
+                margin-bottom: 4px !important;
+                min-height: 16px !important;
+            }
+            
+            .section {
+                margin-bottom: 10px !important;
+            }
+            
+            .header {
+                margin-bottom: 15px !important;
+                padding-bottom: 5px !important;
+            }
+            
+            .document-title {
+                font-size: 16px !important;
+                margin-bottom: 3px !important;
+                letter-spacing: 0.5px !important;
+            }
+            
+            .document-subtitle {
+                font-size: 13px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .location-date {
+                margin-bottom: 15px !important;
+                font-size: 11px !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+            
+            .order-number-date {
+                margin-bottom: 15px !important;
+                font-size: 11px !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+            
+            .section-title {
+                font-size: 12px !important;
+                margin-bottom: 3px !important;
+                padding-bottom: 1px !important;
+            }
+            
+            .info-label, .info-value {
+                font-size: 11px !important;
+                min-height: 16px;
+            }
+            
+            .order-header {
+                margin-bottom: 15px !important;
+            }
+            
+            .company-name {
+                font-size: 11px !important;
+                margin-bottom: 1px !important;
+            }
+            
+            .company-address {
+                font-size: 10px !important;
+                margin-bottom: 1px !important;
+                line-height: 1.05 !important;
+            }
+            
+            .order-title {
+                font-size: 13px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .order-content {
+                font-size: 11px !important;
+                line-height: 1.2 !important;
+            }
+            
+            .order-item {
+                margin-bottom: 6px !important;
+            }
+            
+            .order-main-title {
+                font-size: 15px !important;
+                margin-bottom: 15px !important;
+                letter-spacing: 0.3px !important;
+            }
+            
+            .order-subtitle {
+                font-size: 12px !important;
+                margin-bottom: 12px !important;
+            }
+            
+            .order-basis {
+                font-size: 10px !important;
+                margin-top: 5px !important;
+                margin-bottom: 10px !important;
+                padding-left: 10px !important;
+            }
+            
+            .order-signature-container {
+                margin-top: 20px !important;
+            }
+            
+            .order-signature {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: flex-start !important;
+            }
+            
+            .signature-position, .signature-name {
+                font-size: 11px !important;
+            }
+            
+            .signature-name {
+                text-align: right !important;
+            }
+            
+            .acquainted-list {
+                margin-top: 20px !important;
+            }
+            
+            .acquainted-item {
+                margin-bottom: 6px !important;
+                padding-bottom: 1px !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+            
+            .acquainted-position, .acquainted-signature {
+                font-size: 10px !important;
+                min-width: 130px;
+            }
+            
+            .acquainted-signature {
+                text-align: center !important;
+            }
+            
+            .footer {
+                margin-top: 15px !important;
+                font-size: 9px !important;
+                padding-top: 5px !important;
+            }
+            
+            /* Скрываем префиксы при печати */
+            .supervisor-prefix {
+                display: none !important;
+            }
+            
+            /* Показываем элементы для печати */
+            .print-only {
+                display: block !important;
+            }
+            
+            /* Скрываем выпадающие списки и показываем только текст */
+            .editable-select {
+                display: none !important;
+            }
+            
+            .supervisor-print-value {
+                display: block !important;
+            }
+            
+            /* Показываем значения для печати в Стажировочном листе */
+            .print-value {
+                display: block !important;
+            }
+            
+            /* Скрываем поля ввода при печати */
+            .editable-input, .date-input, .date-range-input {
+                display: none !important;
+            }
+            
+            /* Оптимизация для экономии места */
+            .info-label {
+                flex: 0 0 45% !important;
+                min-width: 180px !important;
+            }
+            
+            .info-value {
+                flex: 1;
+                min-width: 130px !important;
+            }
+            
+            /* Уменьшаем отступы в блоках компании */
+            .company-info {
+                margin-bottom: 8px !important;
+            }
+            
+            /* Уменьшаем отступы в списках ознакомления */
+            .acquainted-list > div:first-child {
+                margin-bottom: 8px !important;
+            }
+            
+            /* Оптимизация высоты строк для экономии места */
+            .info-row {
+                min-height: 16px !important;
+            }
+            
+            /* Уменьшаем отступы между секциями */
+            .section + .section {
+                margin-top: 3px !important;
+            }
+            
+            /* Скрываем контейнеры редактирования имени */
+            .name-display-container {
+                display: block !important;
+            }
+            
+            .name-display-text.editable {
+                border-bottom: none !important;
+                cursor: default !important;
+                background-color: transparent !important;
+            }
+            
+            /* Сжатые стили для Стажировочного листа при печати */
+            #internship-sheet .section {
+                margin-bottom: 8px !important;
+            }
+            
+            #internship-sheet .header {
+                margin-bottom: 12px !important;
+                padding-bottom: 3px !important;
+            }
+            
+            #internship-sheet .section-title {
+                font-size: 11px !important;
+                margin-bottom: 2px !important;
+            }
+            
+            #internship-sheet .info-row {
+                margin-bottom: 3px !important;
+                min-height: 14px !important;
+            }
+            
+            #internship-sheet .info-label, #internship-sheet .info-value {
+                font-size: 10.5px !important;
+            }
+            
+            #internship-sheet .supervisor-section {
+                margin-top: 4px !important;
+                padding: 0 !important;
+            }
+            
+            #internship-sheet .internship-dates-display {
+                font-size: 9.5px !important;
+                margin-top: 2px !important;
+            }
+            
+            /* Компактное отображение нескольких руководителей */
+            .supervisor-compact-display {
+                font-size: 10px !important;
+                line-height: 1.1 !important;
+            }
+            
+            /* Уменьшаем отступы в датах стажировки */
+            #internship-dates-display {
+                padding: 2px 0 !important;
+                margin-top: 2px !important;
+            }
+            
+            /* Сжатый режим для большого количества данных */
+            .compact-mode .info-label {
+                flex: 0 0 40% !important;
+                min-width: 150px !important;
+            }
+            
+            .compact-mode .info-value {
+                flex: 1;
+                min-width: 100px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div role="status" aria-live="polite" class="sr-only" id="aria-status">
+        Документ обновлен
+    </div>
+    
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loading-text">Обновление документа...</p>
+    </div>
+    
+    <header class="tabs-container no-print">
+        <nav class="tabs" role="tablist">
+            <button class="tab-button active" role="tab" aria-selected="true" aria-controls="internship-sheet" onclick="DocumentManager.showDocument('internship-sheet')">Стажировочный лист</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="order" onclick="DocumentManager.showDocument('order')">Распоряжение</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="prikaz" onclick="DocumentManager.showDocument('prikaz')">Приказ</button>
+            <button class="tab-button" onclick="window.print()" style="background-color: var(--success-color); flex: 1.2;">Распечатать все</button>
+            <button class="tab-button clear-cache-button" onclick="App.clearCache()" style="background-color: var(--error-color); flex: 1.2;">Очистить кэш</button>
+        </nav>
+    </header>
+
+<!-- Стажировочный лист -->
+<article id="internship-sheet" class="document-container active" role="tabpanel" aria-labelledby="tab-internship">
+    <header class="header">
+        <h1 class="document-title">Стажировочный лист</h1>
+        <div class="document-subtitle">работника, прошедшего стажировку на рабочем месте</div>
+    </header>
+    
+    <div class="auto-update-notice no-print" id="update-notice">
+        Изменения автоматически применяются ко всем документам
+    </div>
+    
+    <div class="location-date">
+        <div>г. Нижнекамск</div>
+        <div>
+            <input type="date" class="document-date-input" id="document-date" value="2026-01-11" onchange="DataManager.updateDocumentDate(this.value)">
+            <span id="document-date-display">11.01.2026 г.</span>
+        </div>
+    </div>
+    
+    <section class="section compact-section">
+        <h2 class="section-title compact-section-title">Организация:</h2>
+        <div class="info-value compact-info-row" style="font-weight: bold; padding-left: 0; font-size: 13px;">ООО «НОП «Сибирь - ТНХ»</div>
+    </section>
+    
+    <section class="section compact-section">
+        <h2 class="section-title compact-section-title">Сведения о проходящем стажировку</h2>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Фамилия, имя, отчество (при наличии):</div>
+            <div class="info-value">
+                <input type="text" class="editable-input" id="worker-name" value="Карпеева Галина Александровна" oninput="DataManager.updateWorkerName(this.value)">
+                <span class="print-value" id="worker-name-print">Карпеева Галина Александровна</span>
+                <div class="error-message" id="worker-name-error"></div>
+            </div>
+        </div>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Профессия или должность работника:</div>
+            <div class="info-value">
+                <select class="editable-select" id="worker-position" onchange="DataManager.updateWorkerPosition(this.value)">
+                    <option value="охранник">охранник</option>
+                    <option value="старший охранник">старший охранник</option>
+                    <option value="охранник ГБР">охранник ГБР</option>
+                    <option value="старший охранник ГБР">старший охранник ГБР</option>
+                    <option value="Начальник смены охраны">Начальник смены охраны</option>
+                    <option value="Оперативный Дежурный">Оперативный Дежурный</option>
+                    <option value="Специалист отдела по работе с персоналом">Специалист отдела по работе с персоналом</option>
+                    <option value="Специалист отдела режима">Специалист отдела режима</option>
+                    <option value="Бухгалтер материального стола">Бухгалтер материального стола</option>
+                    <option value="Охранник системы видеонаблюдения">Охранник системы видеонаблюдения</option>
+                    <option value="Заместитель начальника охраны объектов">Заместитель начальника охраны объектов</option>
+                    <option value="Начальник охраны объектов">Начальник охраны объектов</option>
+                    <option value="Начальник дежурной части">Начальник дежурной части</option>
+                    <option value="Специалист по охране труда и безопасности дорожного движения">Специалист по охране труда и безопасности дорожного движения</option>
+                </select>
+                <span class="print-value" id="worker-position-print">охранник</span>
+                <div class="error-message" id="worker-position-error"></div>
+            </div>
+        </div>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Наименование структурного подразделения:</div>
+            <div class="info-value">
+                <select class="editable-select" id="worker-department" onchange="DataManager.updateWorkerDepartment(this.value)">
+                    <option value="Охранники">Охранники</option>
+                    <option value="Дежурная часть">Дежурная часть</option>
+                </select>
+                <span class="print-value" id="worker-department-print">Охранники</span>
+            </div>
+        </div>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Подпись:</div>
+            <div class="info-value"></div>
+        </div>
+    </section>
+    
+    <section class="section compact-section">
+        <h2 class="section-title compact-section-title">Сведения о руководителе стажировки</h2>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Фамилия, имя, отчество (при наличии):</div>
+            <div class="info-value">
+                <select class="editable-select" id="supervisor-name-1" onchange="DataManager.handleSupervisorChange(1)">
+                    <option value="Кузьмина Светлана Павловна">1ПЗ 3н Кузьмина Светлана Павловна</option>
+                    <option value="Сафин Ильназ Рависович">1ПЗ 1н Сафин Ильназ Рависович</option>
+                    <option value="Ваганова Эльвира Анатольевна">1ПЗ 2н Ваганова Эльвира Анатольевна</option>
+                    <option value="Закирзянов Ринат Гарифзянович">1ПЗ 4н Закирзянов Ринат Гарифзянович</option>
+                    <option value="Кудряшова Гузель Фаритовна">2ПЗ 1н Кудряшова Гузель Фаритовна</option>
+                    <option value="Шайдуллина Гюзелия Тауфовна">2ПЗ 2н Шайдуллина Гюзелия Тауфовна</option>
+                    <option value="Хегай Эльвира Ядкаровна">2ПЗ 3н Хегай Эльвира Ядкаровна</option>
+                    <option value="Бармалеев Виталий Геннадиевич">2ПЗ 4н Бармалеев Виталий Геннадиевич</option>
+                    <option value="Сергеев Алексей Николаевич">СЦ 1н Сергеев Алексей Николаевич</option>
+                    <option value="Галиев Рашат Азатович">СЦ 2н Галиев Рашат Азатович</option>
+                    <option value="Газиева Светлана Владимировна">СЦ 3н Газиева Светлана Владимировна</option>
+                    <option value="Питеркин Андрей Анатольевич">СЦ 4н Питеркин Андрей Анатольевич</option>
+                    <option value="Глазунова Ирина Николаевна">гр.Т. 1н Глазунова Ирина Николаевна</option>
+                    <option value="Андрианов Дмитрий Владимирович">гр.Т. 2н Андрианов Дмитрий Владимирович</option>
+                    <option value="Шарифуллина Ольга Николаевна">гр.Т. 3н Шарифуллина Ольга Николаевна</option>
+                    <option value="Гурьянов Евгений Иванович">гр.Т. 4н Гурьянов Евгений Иванович</option>
+                    <option value="Корнеева Юлия Владимировна">ДЧ 1н Корнеева Юлия Владимировна</option>
+                    <option value="Бондарева Елена Владимировна">ДЧ 2н Бондарева Елена Владимировна</option>
+                    <option value="Зайнетдинова Любовь Юсуповна">ДЧ 3н Зайнетдинова Любовь Юсуповна</option>
+                    <option value="Фатихова Светлана Вячеславовна">ДЧ 4н Фатихова Светлана Вячеславовна</option>
+                </select>
+                <!-- Скрытый элемент для печати - только ФИО -->
+                <span class="supervisor-print-value" id="supervisor-print-name-1" style="display: none;">Кузьмина Светлана Павловна</span>
+            </div>
+        </div>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Профессия или должность работника:</div>
+            <div class="info-value">
+                <input type="text" class="editable-input" id="supervisor-position-1" value="Начальник смены охраны" oninput="DataManager.updateSupervisorPosition(1, this.value)">
+                <span class="print-value" id="supervisor-position-print-1">Начальник смены охраны</span>
+            </div>
+        </div>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Наименование структурного подразделения:</div>
+            <div class="info-value">
+                <input type="text" class="editable-input" id="supervisor-department-1" value="дежурная часть" oninput="DataManager.updateSupervisorDepartment(1, this.value)">
+                <span class="print-value" id="supervisor-department-print-1">дежурная часть</span>
+            </div>
+        </div>
+        
+        <div class="info-row compact-info-row">
+            <div class="info-label">Подпись:</div>
+            <div class="info-value"></div>
+        </div>
+        
+        <!-- Контейнер для второго руководителя -->
+        <div id="second-supervisor-container"></div>
+        
+        <!-- Контейнер для третьего руководителя -->
+        <div id="third-supervisor-container"></div>
+        
+        <div class="no-print">
+            <button onclick="SupervisorManager.addSecondSupervisor()" class="add-supervisor-button" id="add-supervisor-btn">
+                Добавить второго руководителя
+            </button>
+            <button onclick="SupervisorManager.addThirdSupervisor()" class="add-supervisor-button" id="add-third-supervisor-btn" style="display: none; background-color: var(--info-color); margin-top: 5px;">
+                Добавить третьего руководителя
+            </button>
+        </div>
+    </section>
+    
+    <section class="section compact-section">
+        <h2 class="section-title compact-section-title">Основание для проведения стажировки на рабочем месте:</h2>
+        <div class="info-row compact-info-row">
+            <div class="info-value" style="padding-left: 0; font-size: 13px;">
+                Распоряжение «О направлении на обучение по охране труда и стажировку» № ____ от _______г.
+            </div>
+        </div>
+    </section>
+    
+    <section class="section compact-section">
+        <h2 class="section-title compact-section-title">Количество смен стажировки на рабочем месте:</h2>
+        <div class="info-row compact-info-row">
+            <div class="info-value" style="padding-left: 0; font-size: 13px;">3 смены</div>
+        </div>
+    </section>
+    
+    <section class="section compact-section">
+        <h2 class="section-title compact-section-title">Период проведения стажировки на рабочем месте:</h2>
+        <div class="info-row compact-info-row">
+            <div class="info-value" style="padding-left: 0;">
+                <div class="date-range-container">
+                    <input type="date" class="date-range-input" id="internship-start-date" onchange="DataManager.updateInternshipStartDate(this.value)" value="2026-01-20">
+                </div>
+                
+                <div class="schedule-mode">
+                    <div class="schedule-option">
+                        <input type="radio" id="schedule-1-3" name="schedule-mode" value="1-3" checked onchange="DataManager.updateScheduleMode('1-3')">
+                        <label for="schedule-1-3">Режим 1/3 (сутки через трое)</label>
+                    </div>
+                    <div class="schedule-option">
+                        <input type="radio" id="schedule-1-1" name="schedule-mode" value="1-1" onchange="DataManager.updateScheduleMode('1-1')">
+                        <label for="schedule-1-1">ВАХТА</label>
+                    </div>
+                    <div class="schedule-option">
+                        <input type="radio" id="schedule-gbr" name="schedule-mode" value="gbr" onchange="DataManager.updateScheduleMode('gbr')">
+                        <label for="schedule-gbr">ГБР (сутки через сутки)</label>
+                    </div>
+                </div>
+                
+                <div class="internship-dates-display" id="internship-dates-display">
+                    20.01.2026-21.01.2026г, 23.01.2026-24.01.2026г, 26.01.2026-27.01.2026г.
+                </div>
+                <div class="error-message" id="internship-dates-error"></div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="section compact-section">
+        <h2 class="section-title compact-section-title">Дата допуска работника к самостоятельной работе:</h2>
+        <div class="info-row compact-info-row">
+            <div class="info-value" style="padding-left: 0;">
+                <input type="date" class="date-input" id="employment-date" onchange="DataManager.updateEmploymentDate(this.value)" value="2026-01-28">
+                <span class="print-value" id="employment-date-print">28.01.2026</span>
+                <div class="error-message" id="employment-date-error"></div>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="footer no-print">
+        Документ создан в электронном виде. Для печати нажмите Ctrl+P или используйте кнопку "Распечатать все" выше.
+    </footer>
+</article>
+
+<!-- Распоряжение -->
+<article id="order" class="document-container" role="tabpanel" aria-labelledby="tab-order">
+    <header class="order-header">
+        <div class="company-info">
+            <div class="company-name">Общество с ограниченной ответственностью</div>
+            <div class="company-name">«Негосударственное охранное предприятие</div>
+            <div class="company-name">«Сибирь-ТНХ»</div>
+            <div class="company-name">(ООО «НОП «Сибирь-ТНХ»)</div>
+            
+            <div class="company-address">
+                423570, РФ, Татарстан, г. Нижнекамск,<br>
+                ул. Соболековская, зд. 23<br>
+                тел./факс (8555)37-52-39<br>
+                e-mail: nopsibir@yandex.ru
+            </div>
+            
+            <div class="company-address">
+                ИНН 7206034020, КПП 720601001<br>
+                ОГРН 1067206073021, ОКВЭД 80.10
+            </div>
+        </div>
+    </header>
+    
+    <h1 class="order-title">Распоряжение</h1>
+    
+    <div class="order-number-date">
+        <div>г. Нижнекамск</div>
+        <div id="order-date-display">от 11.01.2026 г.</div>
+        <div>№ _______</div>
+    </div>
+    
+    <h2 class="order-title">«О направлении на обучение по охране труда и стажировку»</h2>
+    
+    <div class="order-content">
+        <div class="order-item">
+            В соответствии с требованиями Постановления Правительства РФ от 24.12.2021 № 2464 «О порядке обучения по охране труда и проверки знания требований охраны труда», в целях проведения обучения и стажировки вновь принятого работника,
+        </div>
+        
+        <div class="order-item" style="font-weight: bold; text-align: center;">
+            Обязываю:
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">1.</span> Назначить обучение с <span id="order-document-date"></span> 
+            <span class="name-display-text editable" onclick="NameEditor.editName('order-position-1')" id="order-position-1-display">охраннику</span> 
+            <span class="name-display-text editable" onclick="NameEditor.editName('order-name-1')" id="order-name-1-display">Карпеевой Галине Александровне</span> 
+            на рабочем месте оборудованном в соответствии с п. 98 Постановления Правительства РФ от 24.12.2021 № 2464 «О порядке обучения по охране труда и проверки знания требований охраны труда».
+            <button class="edit-name-button no-print" onclick="NameEditor.editBothNames('order-name-1', 'order-position-1')">Изменить ФИО в пункте 1</button>
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">2.</span> Назначить проверку знаний требований охраны труда <span id="knowledge-check-date"></span>.
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">3.</span> После проведения первичного инструктажа на рабочем месте, обучения требованиям охране труда и проверки знания требований охраны труда назначить проведение стажировки 
+            <span class="name-display-text editable" onclick="NameEditor.editName('order-position-3')" id="order-position-3-display">охраннику</span> 
+            <span class="name-display-text editable" onclick="NameEditor.editName('order-name-3')" id="order-name-3-display">Карпеевой Галине Александровне</span> 
+            в период <span id="order-internship-period"></span> (3 рабочие смены).
+            <button class="edit-name-button no-print" onclick="NameEditor.editBothNames('order-name-3', 'order-position-3')">Изменить ФИО в пункте 3</button>
+        </div>
+        
+        <div class="order-item" id="order-item-4">
+            <span class="order-item-number">4.</span> Ответственным за стажировку назначается начальник смены охраны: Кузьмина Светлана Павловна.
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">5.</span> Ответственному за стажировку оформить прохождение стажировки в стажировочном листе и передать ведущему специалисту по охране труда Бикметову Р.Т.
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">6.</span> Ведущему специалисту по охране труда Бикметову Р.Т. обеспечить хранение стажировочного листа.
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">7.</span> Контроль за исполнением распоряжения оставляю за собой.
+        </div>
+        
+        <div class="order-signature-container">
+            <div class="order-signature">
+                <div class="signature-position">
+                    Заместитель директора
+                </div>
+                <div class="signature-name">
+                    Хайрутдинов А.Б.
+                </div>
+            </div>
+        </div>
+        
+        <div class="acquainted-list">
+            <div style="font-weight: bold; margin-bottom: 15px;">С приказом ознакомлены:</div>
+            
+            <div class="acquainted-item" id="first-supervisor-acquainted-item">
+                <div class="acquainted-position" id="acquainted-position-supervisor-1">Начальник смены охраны</div>
+                <div class="acquainted-signature"></div>
+                <div id="order-supervisor-name">Кузьмина С.П.</div>
+            </div>
+            
+            <div class="acquainted-item">
+                <div class="acquainted-position">Ведущий специалист по охране труда</div>
+                <div class="acquainted-signature"></div>
+                <div>Бикметов Р.Т.</div>
+            </div>
+            
+            <!-- Контейнер для второго руководителя -->
+            <div id="second-supervisor-acquainted-container"></div>
+            
+            <!-- Контейнер для третьего руководителя -->
+            <div id="third-supervisor-acquainted-container"></div>
+            
+            <div class="acquainted-item">
+                <div class="acquainted-position" id="acquainted-position-order"></div>
+                <div class="acquainted-signature"></div>
+                <div id="acquainted-name-order"></div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer no-print">
+        Документ создан в электронном виде. Для печати нажмите Ctrl+P или используйте кнопку "Распечатать все" выше.
+    </footer>
+</article>
+
+<!-- Приказ -->
+<article id="prikaz" class="document-container" role="tabpanel" aria-labelledby="tab-prikaz">
+    <header class="order-header">
+        <div class="company-info">
+            <div class="company-name">Общество с ограниченной ответственностью</div>
+            <div class="company-name">«Негосударственное охранное предприятие</div>
+            <div class="company-name">«Сибирь-ТНХ»</div>
+            <div class="company-name">(ООО «НОП «Сибирь-ТНХ»)</div>
+            
+            <div class="company-address">
+                423570, РФ, Татарстан, г. Нижнекамск,<br>
+                ул. Соболековская, зд. 23<br>
+                tel./факс (8555)37-52-39<br>
+                e-mail: nopsibir@yandex.ru
+            </div>
+            
+            <div class="company-address">
+                ИНН 7206034020, КПП 720601001<br>
+                ОГРН 1067206073021, ОКВЭД 80.10
+            </div>
+        </div>
+    </header>
+    
+    <h1 class="order-main-title">П Р И К А З</h1>
+    
+    <div class="order-number-date">
+        <div>г. Нижнекамск</div>
+        <div id="prikaz-date">от 28.01.2026 г.</div>
+        <div>№ _______</div>
+    </div>
+    
+    <h2 class="order-subtitle">«О допуске к самостоятельной работе»</h2>
+    
+    <div class="order-content">
+        <div class="order-item">
+            После прохождения инструктажей, обучения и проверки знания требований охраны труда и стажировки на рабочем месте 
+        </div>
+        
+        <div class="order-item" style="font-weight: bold; text-align: center;">
+            ПРИКАЗЫВАЮ:
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">1.</span> Допустить к самостоятельному исполнению своих должностных обязанностей 
+            <span class="name-display-text editable" onclick="NameEditor.editName('prikaz-position')" id="prikaz-position-display">охранника</span> 
+            <span class="name-display-text editable" onclick="NameEditor.editName('prikaz-name')" id="prikaz-name-display">Карпееву Галину Александровну</span> 
+            <span id="prikaz-employment-date"></span>
+            <button class="edit-name-button no-print" onclick="NameEditor.editBothNames('prikaz-name', 'prikaz-position')">Изменить ФИО в пункте 1</button>
+        </div>
+        
+        <div class="order-basis">
+            Основание: стажировочный лист от <span id="prikaz-document-date"></span>
+        </div>
+        
+        <div class="order-item">
+            <span class="order-item-number">2.</span> Контроль за исполнением приказа оставляю за собой.
+        </div>
+        
+        <div class="order-signature-container">
+            <div class="order-signature">
+                <div class="signature-position">
+                    Заместитель директора
+                </div>
+                <div class="signature-name">
+                    Хайрутдинов А.Б.
+                </div>
+            </div>
+        </div>
+        
+        <div class="acquainted-list">
+            <div style="font-weight: bold; margin-bottom: 15px;">С приказом ознакомлены:</div>
+            
+            <div class="acquainted-item">
+                <div class="acquainted-position" id="acquainted-position-prikaz"></div>
+                <div class="acquainted-signature"></div>
+                <div id="acquainted-name-prikaz"></div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer no-print">
+        Документ создан в электронном виде. Для печати нажмите Ctrl+P или используйте кнопку "Распечатать все" выше.
+    </footer>
+</article>
+
+<script>
+    // Конфигурация приложения
+    const CONFIG = {
+        company: {
+            name: 'ООО «НОП «Сибирь - ТНХ»',
+            fullName: 'Общество с ограниченной ответственностью «Негосударственное охранное предприятие «Сибирь-ТНХ»',
+            shortName: 'ООО «НОП «Сибирь-ТНХ»',
+            address: '423570, РФ, Татарстан, г. Нижнекамск, ул. Соболековская, зд. 23',
+            phone: 'тел./факс (8555)37-52-39',
+            email: 'nopsibir@yandex.ru',
+            inn: '7206034020',
+            kpp: '720601001',
+            ogrn: '1067206073021',
+            okved: '80.10'
+        },
+        positions: {
+            dat: {
+                'охранник': 'охраннику',
+                'старший охранник': 'старшему охраннику',
+                'охранник гбр': 'охраннику ГБР',
+                'старший охранник гбр': 'старшему охраннику ГБР',
+                'начальник смены охраны': 'начальнику смены охраны',
+                'оперативный дежурный': 'оперативному дежурному',
+                'специалист отдела по работе с персоналом': 'специалисту отдела по работе с персоналом',
+                'специалист отдела режима': 'специалисту отдела режима',
+                'бухгалтер материального стола': 'бухгалтеру материального стола',
+                'охранник системы видеонаблюдения': 'охраннику системы видеонаблюдения',
+                'заместитель начальника охраны объектов': 'заместителю начальника охраны объектов',
+                'начальник охраны объектов': 'начальнику охраны объектов',
+                'начальник дежурной части': 'начальнику дежурной части',
+                'специалист по охране труда и безопасности дорожного движения': 'специалисту по охране труда и безопасности дорожного движения'
+            },
+            acc: {
+                'охранник': 'охранника',
+                'старший охранник': 'старшего охранника',
+                'охранник гбр': 'охранника ГБР',
+                'старший охранник гбр': 'старшего охранника ГБР',
+                'начальник смены охраны': 'начальника смены охраны',
+                'оперативный дежурный': 'оперативного дежурного',
+                'специалист отдела по работе с персоналом': 'специалиста отдела по работе с персоналом',
+                'специалист отдела режима': 'специалиста отдела режима',
+                'бухгалтер материального стола': 'бухгалтера материального стола',
+                'охранник системы видеонаблюдения': 'охранника системы видеонаблюдения',
+                'заместитель начальника охраны объектов': 'заместителя начальника охраны объектов',
+                'начальник охраны объектов': 'начальника охраны объектов',
+                'начальник дежурной части': 'начальника дежурной части',
+                'специалист по охране труда и безопасности дорожного движения': 'специалиста по охране труда и безопасности дорожного движения'
+            }
+        }
+    };
+
+    // Класс для уведомлений
+    class Notification {
+        static show(message, type = 'info', duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.setAttribute('role', 'alert');
+            
+            document.body.appendChild(notification);
+            
+            // Удаляем предыдущие уведомления того же типа
+            const existingNotifications = document.querySelectorAll(`.notification-${type}`);
+            if (existingNotifications.length > 1) {
+                existingNotifications[0].remove();
+            }
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, duration);
+            
+            return notification;
+        }
+    }
+
+    // Класс для работы с датами
+    class DateFormatter {
+        static toRussian(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    // Пробуем парсить строку в формате DD.MM.YYYY
+                    const parts = dateString.split('.');
+                    if (parts.length === 3) {
+                        const day = parts[0];
+                        const month = parts[1];
+                        const year = parts[2];
+                        return `${day}.${month}.${year}`;
+                    }
+                    return '';
+                }
+                
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                
+                return `${day}.${month}.${year}`;
+            } catch (error) {
+                console.error('Ошибка форматирования даты:', error, 'Входная строка:', dateString);
+                return '';
+            }
+        }
+        
+        static addDays(date, days) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result;
+        }
+        
+        static isValid(dateString) {
+            const date = new Date(dateString);
+            return !isNaN(date.getTime());
+        }
+        
+        static isFuture(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date >= today;
+        }
+        
+        static formatForInput(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        }
+        
+        static addBusinessDays(startDate, daysToAdd) {
+            let count = 0;
+            let currentDate = new Date(startDate);
+            
+            while (count < daysToAdd) {
+                currentDate.setDate(currentDate.getDate() + 1);
+                
+                // Проверяем, не является ли день выходным (суббота=6, воскресенье=0)
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    count++;
+                }
+            }
+            
+            return currentDate;
+        }
+    }
+
+    // Класс для склонения ФИО в разные падежи
+    class NameDeclension {
+        // Дательный падеж (кому?)
+        static toDative(fullName) {
+            if (!fullName) return '';
+            
+            const parts = fullName.split(' ');
+            if (parts.length < 2) return fullName;
+            
+            // Фамилия
+            let surname = parts[0];
+            const lastChar = surname[surname.length - 1].toLowerCase();
+            
+            if (lastChar === 'а') {
+                // Женские фамилии на -а
+                surname = surname.slice(0, -1) + 'ой'; // Иванова -> Ивановой
+            } else if (lastChar === 'о') {
+                // Фамилии на -о (украинские)
+                surname = surname.slice(0, -1) + 'у'; // Шевченко -> Шевченку
+            } else if (lastChar === 'в' || lastChar === 'н') {
+                // Мужские фамилии на -ов, -ин
+                surname = surname + 'у'; // Иванов -> Иванову, Сергеев -> Сергееву
+            } else if (lastChar === 'й') {
+                // Фамилии на -ий, -ый
+                surname = surname.slice(0, -2) + 'ому'; // Толстой -> Толстому
+            }
+            
+            // Имя
+            let firstName = parts[1];
+            const firstNameLastChar = firstName[firstName.length - 1].toLowerCase();
+            
+            if (firstNameLastChar === 'а') {
+                if (firstName.endsWith('ия')) {
+                    firstName = firstName.slice(0, -1) + 'и'; // Мария -> Марии
+                } else {
+                    firstName = firstName.slice(0, -1) + 'е'; // Галина -> Галине
+                }
+            } else if (firstNameLastChar === 'й') {
+                firstName = firstName.slice(0, -1) + 'ю'; // Алексей -> Алексею
+            } else if (firstNameLastChar === 'ь') {
+                firstName = firstName.slice(0, -1) + 'ю'; // Игорь -> Игорю
+            } else {
+                firstName = firstName + 'у'; // Иван -> Ивану, Сергей -> Сергею
+            }
+            
+            // Отчество (если есть)
+            if (parts.length > 2) {
+                let patronymic = parts[2];
+                const patronymicLastChar = patronymic[patronymic.length - 1].toLowerCase();
+                
+                if (patronymicLastChar === 'а') {
+                    patronymic = patronymic.slice(0, -1) + 'е'; // Александровна -> Александровне
+                } else if (patronymicLastChar === 'ч') {
+                    patronymic = patronymic.slice(0, -2) + 'чу'; // Иванович -> Ивановичу
+                }
+                
+                return `${surname} ${firstName} ${patronymic}`;
+            }
+            
+            return `${surname} ${firstName}`;
+        }
+        
+        // Винительный падеж (кого?)
+        static toAccusative(fullName) {
+            if (!fullName) return '';
+            
+            const parts = fullName.split(' ');
+            if (parts.length < 2) return fullName;
+            
+            // Фамилия
+            let surname = parts[0];
+            const lastChar = surname[surname.length - 1].toLowerCase();
+            
+            if (lastChar === 'а') {
+                // Женские фамилии на -а
+                surname = surname.slice(0, -1) + 'у'; // Иванова -> Иванову
+            } else if (lastChar === 'о') {
+                // Фамилии на -о (украинские)
+                surname = surname.slice(0, -1) + 'а'; // Шевченко -> Шевченка
+            } else if (lastChar === 'в' || lastChar === 'н') {
+                // Мужские фамилии на -ов, -ин
+                surname = surname + 'а'; // Иванов -> Иванова, Сергеев -> Сергеева
+            } else if (lastChar === 'й') {
+                // Фамилии на -ий, -ый
+                surname = surname.slice(0, -2) + 'ого'; // Толстой -> Толстого
+            }
+            
+            // Имя
+            let firstName = parts[1];
+            const firstNameLastChar = firstName[firstName.length - 1].toLowerCase();
+            
+            if (firstNameLastChar === 'а') {
+                if (firstName.endsWith('ия')) {
+                    firstName = firstName.slice(0, -1) + 'ию'; // Мария -> Марию
+                } else {
+                    firstName = firstName.slice(0, -1) + 'у'; // Галина -> Галину
+                }
+            } else if (firstNameLastChar === 'й') {
+                firstName = firstName.slice(0, -1) + 'я'; // Алексей -> Алексея
+            } else if (firstNameLastChar === 'ь') {
+                firstName = firstName.slice(0, -1) + 'я'; // Игорь -> Игоря
+            } else {
+                firstName = firstName + 'а'; // Иван -> Ивана, Сергей -> Сергея
+            }
+            
+            // Отчество (если есть)
+            if (parts.length > 2) {
+                let patronymic = parts[2];
+                const patronymicLastChar = patronymic[patronymic.length - 1].toLowerCase();
+                
+                if (patronymicLastChar === 'а') {
+                    patronymic = patronymic.slice(0, -1) + 'у'; // Александровна -> Александровну
+                } else if (patronymicLastChar === 'ч') {
+                    patronymic = patronymic.slice(0, -2) + 'ча'; // Иванович -> Ивановича
+                }
+                
+                return `${surname} ${firstName} ${patronymic}`;
+            }
+            
+            return `${surname} ${firstName}`;
+        }
+        
+        // Родительный падеж
+        static toGenitive(fullName) {
+            if (!fullName) return '';
+            
+            const parts = fullName.split(' ');
+            if (parts.length < 2) return fullName;
+            
+            // Фамилия
+            let surname = parts[0];
+            const lastChar = surname[surname.length - 1].toLowerCase();
+            const secondLastChar = surname.length > 1 ? surname[surname.length - 2].toLowerCase() : '';
+            
+            // Правила для женских фамилий
+            if (lastChar === 'а' && secondLastChar !== 'к' && secondLastChar !== 'г') {
+                surname = surname.slice(0, -1) + 'ой'; // Иванова -> Ивановой
+            } 
+            // Правила для мужских фамилий
+            else if (lastChar === 'в' || lastChar === 'н' || lastChar === 'й') {
+                surname = surname + 'а'; // Иванов -> Иванова, Сергеев -> Сергеева
+            } else if (lastChar === 'о') {
+                surname = surname.slice(0, -1) + 'а'; // Шевченко -> Шевченка
+            }
+            
+            // Имя
+            let firstName = parts[1];
+            const firstNameLastChar = firstName[firstName.length - 1].toLowerCase();
+            
+            if (firstNameLastChar === 'а') {
+                if (firstName.endsWith('ия')) {
+                    firstName = firstName.slice(0, -1) + 'и'; // Мария -> Марии
+                } else {
+                    firstName = firstName.slice(0, -1) + 'ы'; // Галина -> Галины
+                }
+            } else if (firstNameLastChar === 'й') {
+                firstName = firstName.slice(0, -1) + 'я'; // Алексей -> Алексея
+            } else if (firstNameLastChar === 'ь') {
+                firstName = firstName.slice(0, -1) + 'я'; // Игорь -> Игоря
+            } else {
+                firstName = firstName + 'а'; // Иван -> Ивана
+            }
+            
+            // Отчество (если есть)
+            if (parts.length > 2) {
+                let patronymic = parts[2];
+                const patronymicLastChar = patronymic[patronymic.length - 1].toLowerCase();
+                
+                if (patronymicLastChar === 'а') {
+                    patronymic = patronymic.slice(0, -1) + 'ы'; // Александровна -> Александровны
+                } else if (patronymicLastChar === 'ч') {
+                    patronymic = patronymic + 'а'; // Иванович -> Ивановича
+                }
+                
+                return `${surname} ${firstName} ${patronymic}`;
+            }
+            
+            return `${surname} ${firstName}`;
+        }
+    }
+
+    // Класс для редактирования ФИО в документах
+    class NameEditor {
+        static editingElementId = null;
+        static originalValue = '';
+        
+        static editName(elementId) {
+            const element = document.getElementById(elementId + '-display');
+            if (!element) return;
+            
+            this.editingElementId = elementId;
+            this.originalValue = element.textContent;
+            
+            // Создаем контейнер для редактирования
+            const editContainer = document.createElement('div');
+            editContainer.className = 'edit-name-container no-print';
+            editContainer.id = 'edit-name-container-' + elementId;
+            
+            // Создаем поле ввода
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'edit-name-input';
+            input.value = this.originalValue;
+            input.placeholder = 'Введите ФИО';
+            input.id = 'edit-name-input-' + elementId;
+            
+            // Создаем кнопки действий
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'edit-name-actions';
+            
+            const saveButton = document.createElement('button');
+            saveButton.className = 'edit-name-save';
+            saveButton.textContent = 'Сохранить';
+            saveButton.onclick = () => this.saveName(elementId);
+            
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'edit-name-cancel';
+            cancelButton.textContent = 'Отмена';
+            cancelButton.onclick = () => this.cancelEdit(elementId);
+            
+            actionsDiv.appendChild(saveButton);
+            actionsDiv.appendChild(cancelButton);
+            
+            editContainer.appendChild(input);
+            editContainer.appendChild(actionsDiv);
+            
+            // Вставляем контейнер после элемента
+            element.parentNode.insertBefore(editContainer, element.nextSibling);
+            
+            // Скрываем оригинальный элемент
+            element.style.display = 'none';
+            
+            // Фокусируемся на поле ввода
+            input.focus();
+            input.select();
+            
+            // Добавляем обработчик нажатия Enter
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.saveName(elementId);
+                } else if (e.key === 'Escape') {
+                    this.cancelEdit(elementId);
+                }
+            });
+            
+            Notification.show('Введите новое ФИО для отображения в документе', 'info');
+        }
+        
+        static editBothNames(nameElementId, positionElementId) {
+            // Получаем текущие значения
+            const nameElement = document.getElementById(nameElementId + '-display');
+            const positionElement = document.getElementById(positionElementId + '-display');
+            
+            if (!nameElement || !positionElement) return;
+            
+            this.editingElementId = nameElementId;
+            this.originalValue = nameElement.textContent;
+            
+            // Создаем контейнер для редактирования
+            const editContainer = document.createElement('div');
+            editContainer.className = 'edit-name-container no-print';
+            editContainer.id = 'edit-name-container-' + nameElementId;
+            
+            // Создаем поля ввода для ФИО
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'edit-name-input';
+            nameInput.value = this.originalValue;
+            nameInput.placeholder = 'Введите ФИО (например: Карпеевой Галине Александровне)';
+            nameInput.id = 'edit-name-input-' + nameElementId;
+            
+            // Поле ввода для должности
+            const positionInput = document.createElement('input');
+            positionInput.type = 'text';
+            positionInput.className = 'edit-name-input';
+            positionInput.value = positionElement.textContent;
+            positionInput.placeholder = 'Введите должность (например: охраннику)';
+            positionInput.id = 'edit-position-input-' + positionElementId;
+            
+            // Создаем кнопки действий
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'edit-name-actions';
+            
+            const saveButton = document.createElement('button');
+            saveButton.className = 'edit-name-save';
+            saveButton.textContent = 'Сохранить оба поля';
+            saveButton.onclick = () => this.saveBothNames(nameElementId, positionElementId);
+            
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'edit-name-cancel';
+            cancelButton.textContent = 'Отмена';
+            cancelButton.onclick = () => this.cancelEdit(nameElementId);
+            
+            actionsDiv.appendChild(saveButton);
+            actionsDiv.appendChild(cancelButton);
+            
+            editContainer.appendChild(nameInput);
+            editContainer.appendChild(positionInput);
+            editContainer.appendChild(actionsDiv);
+            
+            // Вставляем контейнер после элемента
+            nameElement.parentNode.insertBefore(editContainer, nameElement.nextSibling);
+            
+            // Скрываем оригинальные элементы
+            nameElement.style.display = 'none';
+            positionElement.style.display = 'none';
+            
+            // Фокусируемся на поле ввода ФИО
+            nameInput.focus();
+            nameInput.select();
+            
+            // Добавляем обработчик нажатия Enter
+            nameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.saveBothNames(nameElementId, positionElementId);
+                } else if (e.key === 'Escape') {
+                    this.cancelEdit(nameElementId);
+                }
+            });
+            
+            Notification.show('Введите новые значения для ФИО и должности', 'info');
+        }
+        
+        static saveName(elementId) {
+            const input = document.getElementById('edit-name-input-' + elementId);
+            const element = document.getElementById(elementId + '-display');
+            const editContainer = document.getElementById('edit-name-container-' + elementId);
+            
+            if (!input || !element || !editContainer) return;
+            
+            const newValue = input.value.trim();
+            
+            if (newValue) {
+                element.textContent = newValue;
+                
+                // Сохраняем в localStorage
+                this.saveToStorage(elementId, newValue);
+                
+                Notification.show('ФИО изменено', 'success');
+            }
+            
+            // Удаляем контейнер редактирования
+            editContainer.remove();
+            
+            // Показываем элемент
+            element.style.display = '';
+            
+            this.editingElementId = null;
+            this.originalValue = '';
+        }
+        
+        static saveBothNames(nameElementId, positionElementId) {
+            const nameInput = document.getElementById('edit-name-input-' + nameElementId);
+            const positionInput = document.getElementById('edit-position-input-' + positionElementId);
+            const nameElement = document.getElementById(nameElementId + '-display');
+            const positionElement = document.getElementById(positionElementId + '-display');
+            const editContainer = document.getElementById('edit-name-container-' + nameElementId);
+            
+            if (!nameInput || !positionInput || !nameElement || !positionElement || !editContainer) return;
+            
+            const newNameValue = nameInput.value.trim();
+            const newPositionValue = positionInput.value.trim();
+            
+            if (newNameValue) {
+                nameElement.textContent = newNameValue;
+                this.saveToStorage(nameElementId, newNameValue);
+            }
+            
+            if (newPositionValue) {
+                positionElement.textContent = newPositionValue;
+                this.saveToStorage(positionElementId, newPositionValue);
+            }
+            
+            if (newNameValue || newPositionValue) {
+                Notification.show('ФИО и должность изменены', 'success');
+            }
+            
+            // Удаляем контейнер редактирования
+            editContainer.remove();
+            
+            // Показываем элементы
+            nameElement.style.display = '';
+            positionElement.style.display = '';
+            
+            this.editingElementId = null;
+            this.originalValue = '';
+        }
+        
+        static cancelEdit(elementId) {
+            const element = document.getElementById(elementId + '-display');
+            const editContainer = document.getElementById('edit-name-container-' + elementId);
+            
+            if (element && editContainer) {
+                editContainer.remove();
+                element.style.display = '';
+                element.textContent = this.originalValue;
+            }
+            
+            this.editingElementId = null;
+            this.originalValue = '';
+            
+            Notification.show('Изменения отменены', 'warning');
+        }
+        
+        static saveToStorage(elementId, value) {
+            try {
+                const storedNames = JSON.parse(localStorage.getItem('editedNames') || '{}');
+                storedNames[elementId] = value;
+                localStorage.setItem('editedNames', JSON.stringify(storedNames));
+            } catch (error) {
+                console.warn('Не удалось сохранить измененное имя:', error);
+            }
+        }
+        
+        static loadFromStorage() {
+            try {
+                const storedNames = JSON.parse(localStorage.getItem('editedNames') || '{}');
+                
+                // Загружаем сохраненные значения
+                Object.keys(storedNames).forEach(elementId => {
+                    const element = document.getElementById(elementId + '-display');
+                    if (element && storedNames[elementId]) {
+                        element.textContent = storedNames[elementId];
+                    }
+                });
+                
+                return storedNames;
+            } catch (error) {
+                console.warn('Не удалось загрузить измененные имена:', error);
+                return {};
+            }
+        }
+        
+        static clearStorage() {
+            try {
+                localStorage.removeItem('editedNames');
+            } catch (error) {
+                console.warn('Не удалось очистить измененные имена:', error);
+            }
+        }
+        
+        static resetToDefault() {
+            if (confirm('Вы уверены, что хотите сбросить все измененные ФИО к значениям по умолчанию?')) {
+                // Удаляем контейнеры редактирования, если они открыты
+                const editContainers = document.querySelectorAll('.edit-name-container');
+                editContainers.forEach(container => container.remove());
+                
+                // Показываем все скрытые элементы
+                const hiddenElements = document.querySelectorAll('[id$="-display"]');
+                hiddenElements.forEach(element => {
+                    element.style.display = '';
+                });
+                
+                // Очищаем хранилище
+                this.clearStorage();
+                
+                // Обновляем документы для восстановления значений по умолчанию
+                DataManager.updateDocuments();
+                
+                Notification.show('Все ФИО сброшены к значениям по умолчанию', 'info');
+            }
+        }
+    }
+
+    // Класс для управления руководителями стажировки
+    class SupervisorManager {
+        static supervisors = [
+            {
+                id: 1,
+                name: "Кузьмина Светлана Павловна",
+                position: "Начальник смены охраны",
+                department: "дежурная часть"
+            }
+        ];
+        
+        static supervisorOptions = [
+            {value: 'Кузьмина Светлана Павловна', display: '1ПЗ 3н Кузьмина Светлана Павловна'},
+            {value: 'Сафин Ильназ Рависович', display: '1ПЗ 1н Сафин Ильназ Рависович'},
+            {value: 'Ваганова Эльвира Анатольевна', display: '1ПЗ 2н Ваганова Эльвира Анатольевна'},
+            {value: 'Закирзянов Ринат Гарифзянович', display: '1ПЗ 4н Закирзянов Ринат Гарифзянович'},
+            {value: 'Кудряшова Гузель Фаритовна', display: '2ПЗ 1н Кудряшова Гузель Фаритовна'},
+            {value: 'Шайдуллина Гюзелия Тауфовна', display: '2ПЗ 2н Шайдуллина Гюзелия Тауфовна'},
+            {value: 'Хегай Эльвира Ядкаровна', display: '2ПЗ 3н Хегай Эльвира Ядкаровна'},
+            {value: 'Бармалеев Виталий Геннадиевич', display: '2ПЗ 4н Бармалеев Виталий Геннадиевич'},
+            {value: 'Сергеев Алексей Николаевич', display: 'СЦ 1н Сергеев Алексей Николаевич'},
+            {value: 'Галиев Рашат Азатович', display: 'СЦ 2н Галиев Рашат Азатович'},
+            {value: 'Газиева Светлана Владимировна', display: 'СЦ 3н Газиева Светлана Владимировна'},
+            {value: 'Питеркин Андрей Анатольевич', display: 'СЦ 4н Питеркин Андрей Анатольевич'},
+            {value: 'Глазунова Ирина Николаевна', display: 'гр.Т. 1н Глазунова Ирина Николаевна'},
+            {value: 'Андрианов Дмитрий Владимирович', display: 'гр.Т. 2н Андрианов Дмитрий Владимирович'},
+            {value: 'Шарифуллина Ольга Николаевна', display: 'гр.Т. 3н Шарифуллина Ольга Николаевна'},
+            {value: 'Гурьянов Евгений Иванович', display: 'гр.Т. 4н Гурьянов Евгений Иванович'},
+            {value: 'Корнеева Юлия Владимировна', display: 'ДЧ 1н Корнеева Юлия Владимировна'},
+            {value: 'Бондарева Елена Владимировна', display: 'ДЧ 2н Бондарева Елена Владимировна'},
+            {value: 'Зайнетдинова Любовь Юсуповна', display: 'ДЧ 3н Зайнетдинова Любовь Юсуповна'},
+            {value: 'Фатихова Светлана Вячеславовна', display: 'ДЧ 4н Фатихова Светлана Вячеславовна'}
+        ];
+        
+        static init() {
+            this.loadFromStorage();
+            this.updateUI();
+        }
+        
+        static loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('internshipSupervisors');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    this.supervisors = parsed;
+                }
+            } catch (error) {
+                console.warn('Не удалось загрузить данные руководителей из localStorage:', error);
+            }
+        }
+        
+        static saveToStorage() {
+            try {
+                localStorage.setItem('internshipSupervisors', JSON.stringify(this.supervisors));
+            } catch (error) {
+                console.warn('Не удалось сохранить данные руководителей в localStorage:', error);
+            }
+        }
+        
+        static addSecondSupervisor() {
+            if (this.supervisors.length >= 3) {
+                Notification.show('Можно добавить только трех руководителей', 'warning');
+                return;
+            }
+            
+            const newId = this.supervisors.length + 1;
+            this.supervisors.push({
+                id: newId,
+                name: "",
+                position: "",
+                department: ""
+            });
+            
+            this.saveToStorage();
+            this.updateUI();
+            Notification.show('Добавлен второй руководитель стажировки', 'info');
+            
+            // Показываем кнопку для добавления третьего руководителя
+            const thirdButton = document.getElementById('add-third-supervisor-btn');
+            if (thirdButton && this.supervisors.length === 2) {
+                thirdButton.style.display = 'block';
+            }
+        }
+        
+        static addThirdSupervisor() {
+            if (this.supervisors.length >= 3) {
+                Notification.show('Можно добавить только трех руководителей', 'warning');
+                return;
+            }
+            
+            const newId = this.supervisors.length + 1;
+            this.supervisors.push({
+                id: newId,
+                name: "",
+                position: "",
+                department: ""
+            });
+            
+            this.saveToStorage();
+            this.updateUI();
+            Notification.show('Добавлен третий руководитель стажировки', 'info');
+            
+            // Скрываем кнопку для добавления третьего руководителя
+            const thirdButton = document.getElementById('add-third-supervisor-btn');
+            if (thirdButton) {
+                thirdButton.style.display = 'none';
+            }
+        }
+        
+        static removeSupervisor(supervisorId) {
+            if (supervisorId === 1) {
+                Notification.show('Нельзя удалить первого руководителя', 'warning');
+                return;
+            }
+            
+            // Удаляем руководителя
+            this.supervisors = this.supervisors.filter(s => s.id !== supervisorId);
+            
+            // Перенумеровываем оставшихся руководителей
+            this.supervisors.forEach((supervisor, index) => {
+                supervisor.id = index + 1;
+            });
+            
+            this.saveToStorage();
+            this.updateUI();
+            
+            // Обновляем кнопки добавления
+            const secondButton = document.getElementById('add-supervisor-btn');
+            const thirdButton = document.getElementById('add-third-supervisor-btn');
+            
+            if (this.supervisors.length === 1) {
+                if (secondButton) secondButton.style.display = 'block';
+                if (thirdButton) thirdButton.style.display = 'none';
+            } else if (this.supervisors.length === 2) {
+                if (secondButton) secondButton.style.display = 'none';
+                if (thirdButton) thirdButton.style.display = 'block';
+            } else {
+                if (secondButton) secondButton.style.display = 'none';
+                if (thirdButton) thirdButton.style.display = 'none';
+            }
+            
+            Notification.show('Руководитель удален', 'info');
+        }
+        
+        static updateSupervisor(supervisorId, field, value) {
+            const supervisor = this.supervisors.find(s => s.id === supervisorId);
+            if (supervisor) {
+                supervisor[field] = value;
+                this.saveToStorage();
+                DataManager.debouncedUpdate();
+                
+                // Обновляем элемент для печати
+                const printElement = document.getElementById(`${field}-print-${supervisorId}`);
+                if (printElement) {
+                    printElement.textContent = value;
+                }
+            }
+        }
+        
+        static updateUI() {
+            // Обновляем контейнер второго руководителя
+            const secondContainer = document.getElementById('second-supervisor-container');
+            const thirdContainer = document.getElementById('third-supervisor-container');
+            
+            if (!secondContainer || !thirdContainer) return;
+            
+            // Очищаем контейнеры
+            secondContainer.innerHTML = '';
+            thirdContainer.innerHTML = '';
+            
+            // Показываем второго руководителя (если есть)
+            if (this.supervisors.length > 1) {
+                const secondSupervisor = this.supervisors[1];
+                
+                const section = document.createElement('div');
+                section.className = 'supervisor-section compact-supervisor-section';
+                section.innerHTML = `
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Фамилия, имя, отчество (при наличии):</div>
+                        <div class="info-value">
+                            <select class="editable-select" id="supervisor-name-${secondSupervisor.id}" 
+                                    onchange="DataManager.handleSupervisorChange(${secondSupervisor.id})">
+                                ${this.generateSupervisorOptions(secondSupervisor.name)}
+                            </select>
+                            <!-- Скрытый элемент для печати - только ФИО -->
+                            <span class="supervisor-print-value" id="supervisor-print-name-${secondSupervisor.id}" style="display: none;">${secondSupervisor.name || ''}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Профессия или должность работника:</div>
+                        <div class="info-value">
+                            <input type="text" class="editable-input" id="supervisor-position-${secondSupervisor.id}" 
+                                   value="${secondSupervisor.position}" 
+                                   oninput="SupervisorManager.updateSupervisor(${secondSupervisor.id}, 'position', this.value)">
+                            <span class="print-value" id="supervisor-position-print-${secondSupervisor.id}">${secondSupervisor.position || ''}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Наименование структурного подразделения:</div>
+                        <div class="info-value">
+                            <input type="text" class="editable-input" id="supervisor-department-${secondSupervisor.id}" 
+                                   value="${secondSupervisor.department}" 
+                                   oninput="SupervisorManager.updateSupervisor(${secondSupervisor.id}, 'department', this.value)">
+                            <span class="print-value" id="supervisor-department-print-${secondSupervisor.id}">${secondSupervisor.department || ''}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Подпись:</div>
+                        <div class="info-value"></div>
+                    </div>
+                    
+                    <div class="no-print" style="text-align: right; margin-top: 8px;">
+                        <button onclick="SupervisorManager.removeSupervisor(${secondSupervisor.id})" class="remove-supervisor-btn">
+                            Удалить второго руководителя
+                        </button>
+                    </div>
+                `;
+                
+                secondContainer.appendChild(section);
+            }
+            
+            // Показываем третьего руководителя (если есть)
+            if (this.supervisors.length > 2) {
+                const thirdSupervisor = this.supervisors[2];
+                
+                const section = document.createElement('div');
+                section.className = 'supervisor-section compact-supervisor-section';
+                section.innerHTML = `
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Фамилия, имя, отчество (при наличии):</div>
+                        <div class="info-value">
+                            <select class="editable-select" id="supervisor-name-${thirdSupervisor.id}" 
+                                    onchange="DataManager.handleSupervisorChange(${thirdSupervisor.id})">
+                                ${this.generateSupervisorOptions(thirdSupervisor.name)}
+                            </select>
+                            <!-- Скрытый элемент для печати - только ФИО -->
+                            <span class="supervisor-print-value" id="supervisor-print-name-${thirdSupervisor.id}" style="display: none;">${thirdSupervisor.name || ''}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Профессия или должность работника:</div>
+                        <div class="info-value">
+                            <input type="text" class="editable-input" id="supervisor-position-${thirdSupervisor.id}" 
+                                   value="${thirdSupervisor.position}" 
+                                   oninput="SupervisorManager.updateSupervisor(${thirdSupervisor.id}, 'position', this.value)">
+                            <span class="print-value" id="supervisor-position-print-${thirdSupervisor.id}">${thirdSupervisor.position || ''}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Наименование структурного подразделения:</div>
+                        <div class="info-value">
+                            <input type="text" class="editable-input" id="supervisor-department-${thirdSupervisor.id}" 
+                                   value="${thirdSupervisor.department}" 
+                                   oninput="SupervisorManager.updateSupervisor(${thirdSupervisor.id}, 'department', this.value)">
+                            <span class="print-value" id="supervisor-department-print-${thirdSupervisor.id}">${thirdSupervisor.department || ''}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row compact-info-row">
+                        <div class="info-label">Подпись:</div>
+                        <div class="info-value"></div>
+                    </div>
+                    
+                    <div class="no-print" style="text-align: right; margin-top: 8px;">
+                        <button onclick="SupervisorManager.removeSupervisor(${thirdSupervisor.id})" class="remove-supervisor-btn">
+                            Удалить третьего руководителя
+                        </button>
+                    </div>
+                `;
+                
+                thirdContainer.appendChild(section);
+            }
+            
+            // Обновляем кнопки добавления
+            const secondButton = document.getElementById('add-supervisor-btn');
+            const thirdButton = document.getElementById('add-third-supervisor-btn');
+            
+            if (secondButton) {
+                secondButton.style.display = this.supervisors.length >= 3 ? 'none' : 'block';
+            }
+            
+            if (thirdButton) {
+                thirdButton.style.display = (this.supervisors.length === 2) ? 'block' : 'none';
+            }
+        }
+        
+        static generateSupervisorOptions(selectedValue) {
+            let options = '';
+            this.supervisorOptions.forEach(option => {
+                const selected = option.value === selectedValue ? 'selected' : '';
+                options += `<option value="${option.value}" ${selected}>${option.display}</option>`;
+            });
+            return options;
+        }
+        
+        static getSupervisors() {
+            return this.supervisors;
+        }
+        
+        static getSupervisorsForRTF() {
+            return this.supervisors.filter(s => s.name.trim() !== '');
+        }
+        
+        static getShortName(fullName) {
+            const parts = fullName.split(' ');
+            if (parts.length >= 3) {
+                return parts[0] + ' ' + parts[1][0] + '.' + parts[2][0] + '.';
+            } else if (parts.length === 2) {
+                return parts[0] + ' ' + parts[1][0] + '.';
+            }
+            return fullName;
+        }
+        
+        static getNameWithoutPrefix(fullDisplayName) {
+            // Удаляем префикс (первые 2 слова)
+            const parts = fullDisplayName.split(' ');
+            if (parts.length >= 3) {
+                // Пропускаем первые две части (префикс типа "1ПЗ 1н")
+                return parts.slice(2).join(' ');
+            }
+            return fullDisplayName;
+        }
+        
+        static getPrefixFromDisplay(displayName) {
+            const parts = displayName.split(' ');
+            if (parts.length >= 2) {
+                return parts[0] + ' ' + parts[1];
+            }
+            return '';
+        }
+    }
+
+    // Класс для работы с данными
+    class DataManager {
+        static data = {
+            workerName: "Карпеева Галина Александровна",
+            workerPosition: "охранник",
+            workerDepartment: "Охранники",
+            workerSurname: "Карпеева",
+            internshipStartDate: "2026-01-20",
+            internshipEndDate: "2026-01-27",
+            employmentDate: "2026-01-28",
+            internshipDatesDisplay: "20.01.2026-21.01.2026г, 23.01.2026-24.01.2026г, 26.01.2026-27.01.2026г.",
+            scheduleMode: "1-3",
+            documentDate: "2026-01-11",
+            knowledgeCheckDate: "2026-01-14"
+        };
+        
+        static errors = {
+            workerName: '',
+            workerPosition: '',
+            internshipDates: '',
+            employmentDate: ''
+        };
+        
+        static init() {
+            this.loadFromStorage();
+            SupervisorManager.init();
+            NameEditor.loadFromStorage();
+            this.generateInternshipDates();
+            this.updateUI();
+            this.updateAutoNames();
+            this.updatePrintValues();
+        }
+        
+        static saveToStorage() {
+            try {
+                localStorage.setItem('internshipData', JSON.stringify(this.data));
+            } catch (error) {
+                console.warn('Не удалось сохранить данные в localStorage:', error);
+            }
+        }
+        
+        static loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('internshipData');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(this.data, parsed);
+                }
+            } catch (error) {
+                console.warn('Не удалось загрузить данные из localStorage:', error);
+            }
+        }
+        
+        static clearStorage() {
+            try {
+                localStorage.removeItem('internshipData');
+                localStorage.removeItem('internshipSupervisors');
+                NameEditor.clearStorage();
+            } catch (error) {
+                console.warn('Не удалось очистить localStorage:', error);
+            }
+        }
+        
+        static updateWorkerName(name) {
+            this.data.workerName = name.trim();
+            const nameParts = this.data.workerName.split(' ');
+            this.data.workerSurname = nameParts[0] || '';
+            
+            this.validateWorkerName();
+            this.saveToStorage();
+            this.updateAutoNames();
+            this.updatePrintValues();
+            this.debouncedUpdate();
+        }
+        
+        static updateWorkerPosition(position) {
+            this.data.workerPosition = position;
+            this.saveToStorage();
+            this.updateAutoNames();
+            this.updatePrintValues();
+            this.debouncedUpdate();
+        }
+        
+        static updateWorkerDepartment(department) {
+            this.data.workerDepartment = department;
+            this.saveToStorage();
+            this.updatePrintValues();
+            this.debouncedUpdate();
+        }
+        
+        static updateInternshipStartDate(date) {
+            this.data.internshipStartDate = date;
+            this.generateInternshipDates();
+            this.validateInternshipDates();
+            this.saveToStorage();
+            this.debouncedUpdate();
+        }
+        
+        static updateEmploymentDate(date) {
+            this.data.employmentDate = date;
+            this.validateEmploymentDate();
+            this.saveToStorage();
+            this.updatePrintValues();
+            this.debouncedUpdate();
+        }
+        
+        static updateDocumentDate(date) {
+            this.data.documentDate = date;
+            this.saveToStorage();
+            this.updateDocumentDateDisplay();
+            this.debouncedUpdate();
+        }
+        
+        static updateScheduleMode(mode) {
+            this.data.scheduleMode = mode;
+            this.generateInternshipDates();
+            this.saveToStorage();
+            this.debouncedUpdate();
+        }
+        
+        static handleSupervisorChange(supervisorId) {
+            const selectElement = document.getElementById(`supervisor-name-${supervisorId}`);
+            if (!selectElement) return;
+            
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const displayName = selectedOption.text;
+            
+            const name = SupervisorManager.getNameWithoutPrefix(displayName);
+            
+            SupervisorManager.updateSupervisor(supervisorId, 'name', name);
+            
+            const printElement = document.getElementById(`supervisor-print-name-${supervisorId}`);
+            if (printElement) {
+                printElement.textContent = name;
+            }
+            
+            const prefix = SupervisorManager.getPrefixFromDisplay(displayName);
+            
+            let position = "";
+            let department = "";
+            
+            if (prefix.startsWith('ДЧ')) {
+                position = "Оперативный Дежурный";
+                department = "Дежурная часть";
+            } else if (prefix.startsWith('1ПЗ') || prefix.startsWith('2ПЗ') || 
+                      prefix.startsWith('СЦ') || prefix.startsWith('гр.Т.')) {
+                position = "Начальник смены охраны";
+                department = "Охранники";
+            }
+            
+            if (position) {
+                const positionElement = document.getElementById(`supervisor-position-${supervisorId}`);
+                if (positionElement) {
+                    positionElement.value = position;
+                    SupervisorManager.updateSupervisor(supervisorId, 'position', position);
+                }
+            }
+            
+            if (department) {
+                const departmentElement = document.getElementById(`supervisor-department-${supervisorId}`);
+                if (departmentElement) {
+                    departmentElement.value = department;
+                    SupervisorManager.updateSupervisor(supervisorId, 'department', department);
+                }
+            }
+            
+            this.debouncedUpdate();
+        }
+        
+        static updateSupervisorName(supervisorId, name) {
+            SupervisorManager.updateSupervisor(supervisorId, 'name', name);
+            
+            const printElement = document.getElementById(`supervisor-print-name-${supervisorId}`);
+            if (printElement) {
+                printElement.textContent = name;
+            }
+        }
+        
+        static updateSupervisorPosition(supervisorId, position) {
+            SupervisorManager.updateSupervisor(supervisorId, 'position', position);
+        }
+        
+        static updateSupervisorDepartment(supervisorId, department) {
+            SupervisorManager.updateSupervisor(supervisorId, 'department', department);
+        }
+        
+        static generateInternshipDates() {
+            if (!this.data.internshipStartDate || !DateFormatter.isValid(this.data.internshipStartDate)) {
+                this.data.internshipDatesDisplay = "";
+                this.data.internshipEndDate = "";
+                this.data.employmentDate = "";
+                return;
+            }
+            
+            const startDate = new Date(this.data.internshipStartDate);
+            const datesArray = [];
+            
+            if (this.data.scheduleMode === "1-3") {
+                // Режим 1/3: сутки через трое (3 дня отдыха между сменами)
+                for (let i = 0; i < 3; i++) {
+                    let shiftStart, shiftEnd;
+                    
+                    if (i === 0) {
+                        // Первая смена начинается в день начала стажировки
+                        shiftStart = new Date(startDate);
+                        shiftEnd = DateFormatter.addDays(shiftStart, 1);
+                    } else {
+                        // Последующие смены: сутки через трое
+                        const prevShiftEnd = datesArray[i-1].end;
+                        shiftStart = DateFormatter.addDays(prevShiftEnd, 3);
+                        shiftEnd = DateFormatter.addDays(shiftStart, 1);
+                    }
+                    
+                    datesArray.push({
+                        start: shiftStart,
+                        end: shiftEnd,
+                        display: `${DateFormatter.toRussian(shiftStart)}-${DateFormatter.toRussian(shiftEnd)}г`
+                    });
+                }
+                
+                // Формируем строку для отображения для режима 1/3
+                this.data.internshipDatesDisplay = datesArray.map(d => d.display).join(', ') + '.';
+                
+                // Автоматически устанавливаем дату окончания стажировки (последний день третьей смены)
+                this.data.internshipEndDate = DateFormatter.formatForInput(datesArray[2].end);
+                
+                // Автоматически устанавливаем дату допуска (последний день третьей смены + 1 день)
+                const employmentDate = DateFormatter.addDays(datesArray[2].end, 1);
+                this.data.employmentDate = DateFormatter.formatForInput(employmentDate);
+                
+            } else if (this.data.scheduleMode === "1-1") {
+                // Режим ВАХТА: 3 дня подряд (без ночи)
+                for (let i = 0; i < 3; i++) {
+                    const shiftStart = DateFormatter.addDays(startDate, i);
+                    const shiftEnd = shiftStart; // Тот же день
+                    
+                    datesArray.push({
+                        start: shiftStart,
+                        end: shiftEnd,
+                        display: `${DateFormatter.toRussian(shiftStart)}`
+                    });
+                }
+                
+                // Объединяем даты для отображения
+                this.data.internshipDatesDisplay = datesArray.map(d => d.display).join(', ') + '.';
+                
+                // Для ВАХТЫ дата окончания = последний день
+                this.data.internshipEndDate = DateFormatter.formatForInput(datesArray[2].start);
+                
+                // Дата допуска = последний день + 1 день
+                this.data.employmentDate = DateFormatter.formatForInput(DateFormatter.addDays(datesArray[2].start, 1));
+                
+            } else if (this.data.scheduleMode === "gbr") {
+                // Режим ГБР: сутки через сутки
+                for (let i = 0; i < 3; i++) {
+                    let shiftStart, shiftEnd;
+                    
+                    if (i === 0) {
+                        // Первая смена начинается в день начала стажировки
+                        shiftStart = new Date(startDate);
+                        shiftEnd = DateFormatter.addDays(shiftStart, 1);
+                    } else {
+                        // Последующие смены: через сутки
+                        const prevShiftEnd = datesArray[i-1].end;
+                        shiftStart = DateFormatter.addDays(prevShiftEnd, 1);
+                        shiftEnd = DateFormatter.addDays(shiftStart, 1);
+                    }
+                    
+                    datesArray.push({
+                        start: shiftStart,
+                        end: shiftEnd,
+                        display: `${DateFormatter.toRussian(shiftStart)}-${DateFormatter.toRussian(shiftEnd)}г`
+                    });
+                }
+                
+                // Формируем строку для отображения для режима ГБР
+                this.data.internshipDatesDisplay = datesArray.map(d => d.display).join(', ') + '.';
+                
+                // Автоматически устанавливаем дату окончания стажировки (последний день третьей смены)
+                this.data.internshipEndDate = DateFormatter.formatForInput(datesArray[2].end);
+                
+                // Автоматически устанавливаем дату допуска (последний день третьей смены + 1 день)
+                const employmentDate = DateFormatter.addDays(datesArray[2].end, 1);
+                this.data.employmentDate = DateFormatter.formatForInput(employmentDate);
+            }
+            
+            // Обновляем отображение в UI
+            this.updateInternshipDatesDisplay();
+        }
+        
+        static updateInternshipDatesDisplay() {
+            const displayElement = document.getElementById('internship-dates-display');
+            if (displayElement) {
+                displayElement.textContent = this.data.internshipDatesDisplay;
+            }
+        }
+        
+        static calculateKnowledgeCheckDate() {
+            const documentDate = new Date(this.data.documentDate);
+            const knowledgeCheckDate = DateFormatter.addBusinessDays(documentDate, 3);
+            this.data.knowledgeCheckDate = DateFormatter.formatForInput(knowledgeCheckDate);
+            
+            return DateFormatter.toRussian(this.data.knowledgeCheckDate);
+        }
+        
+        static updateDocumentDateDisplay() {
+            const documentDateDisplay = document.getElementById('document-date-display');
+            if (documentDateDisplay) {
+                documentDateDisplay.textContent = DateFormatter.toRussian(this.data.documentDate) + ' г.';
+            }
+        }
+        
+        static updateAutoNames() {
+            const workerName = this.data.workerName;
+            const workerPosition = this.data.workerPosition;
+            
+            const dativeName = this.getDativeName(workerName);
+            const accusativeName = this.getAccusativeName(workerName);
+            const positionDat = this.getPositionForm(workerPosition, 'dat');
+            const positionAcc = this.getPositionForm(workerPosition, 'acc');
+            
+            const orderName1Display = document.getElementById('order-name-1-display');
+            const orderPosition1Display = document.getElementById('order-position-1-display');
+            const orderName3Display = document.getElementById('order-name-3-display');
+            const orderPosition3Display = document.getElementById('order-position-3-display');
+            
+            const storedNames = NameEditor.loadFromStorage();
+            
+            if (orderName1Display && !storedNames['order-name-1']) {
+                orderName1Display.textContent = dativeName;
+            }
+            if (orderPosition1Display && !storedNames['order-position-1']) {
+                orderPosition1Display.textContent = positionDat;
+            }
+            if (orderName3Display && !storedNames['order-name-3']) {
+                orderName3Display.textContent = dativeName;
+            }
+            if (orderPosition3Display && !storedNames['order-position-3']) {
+                orderPosition3Display.textContent = positionDat;
+            }
+            
+            const prikazNameDisplay = document.getElementById('prikaz-name-display');
+            const prikazPositionDisplay = document.getElementById('prikaz-position-display');
+            
+            if (prikazNameDisplay && !storedNames['prikaz-name']) {
+                prikazNameDisplay.textContent = accusativeName;
+            }
+            if (prikazPositionDisplay && !storedNames['prikaz-position']) {
+                prikazPositionDisplay.textContent = positionAcc;
+            }
+        }
+        
+        static updatePrintValues() {
+            const workerNamePrint = document.getElementById('worker-name-print');
+            if (workerNamePrint) {
+                workerNamePrint.textContent = this.data.workerName;
+            }
+            
+            const workerPositionPrint = document.getElementById('worker-position-print');
+            if (workerPositionPrint) {
+                workerPositionPrint.textContent = this.data.workerPosition;
+            }
+            
+            const workerDepartmentPrint = document.getElementById('worker-department-print');
+            if (workerDepartmentPrint) {
+                workerDepartmentPrint.textContent = this.data.workerDepartment;
+            }
+            
+            const employmentDatePrint = document.getElementById('employment-date-print');
+            if (employmentDatePrint) {
+                employmentDatePrint.textContent = DateFormatter.toRussian(this.data.employmentDate);
+            }
+            
+            const supervisors = SupervisorManager.getSupervisors();
+            supervisors.forEach(supervisor => {
+                const positionPrint = document.getElementById(`supervisor-position-print-${supervisor.id}`);
+                if (positionPrint) {
+                    positionPrint.textContent = supervisor.position;
+                }
+                
+                const departmentPrint = document.getElementById(`supervisor-department-print-${supervisor.id}`);
+                if (departmentPrint) {
+                    departmentPrint.textContent = supervisor.department;
+                }
+            });
+        }
+        
+        static validateWorkerName() {
+            const name = this.data.workerName.trim();
+            if (!name) {
+                this.errors.workerName = 'Введите ФИО работника';
+            } else if (name.split(' ').length < 2) {
+                this.errors.workerName = 'Введите фамилию и имя';
+            } else {
+                this.errors.workerName = '';
+            }
+            this.showError('worker-name-error', this.errors.workerName);
+        }
+        
+        static validateInternshipDates() {
+            const start = this.data.internshipStartDate;
+            const end = this.data.internshipEndDate;
+            
+            if (!DateFormatter.isValid(start) || !DateFormatter.isValid(end)) {
+                this.errors.internshipDates = 'Укажите корректные даты стажировки';
+            } else if (new Date(start) > new Date(end)) {
+                this.errors.internshipDates = 'Дата начала не может быть позже даты окончания';
+            } else {
+                this.errors.internshipDates = '';
+            }
+            this.showError('internship-dates-error', this.errors.internshipDates);
+        }
+        
+        static validateEmploymentDate() {
+            const date = this.data.employmentDate;
+            
+            if (!DateFormatter.isValid(date)) {
+                this.errors.employmentDate = 'Укажите корректную дату допуска';
+            } else if (!DateFormatter.isFuture(date)) {
+                this.errors.employmentDate = 'Дата допуска не может быть в прошлом';
+            } else {
+                this.errors.employmentDate = '';
+            }
+            this.showError('employment-date-error', this.errors.employmentDate);
+        }
+        
+        static showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            const input = document.querySelector(`[id^="${elementId.split('-error')[0]}"]`);
+            
+            if (element && input) {
+                if (message) {
+                    element.textContent = message;
+                    element.classList.add('show');
+                    input.classList.add('has-error');
+                } else {
+                    element.textContent = '';
+                    element.classList.remove('show');
+                    input.classList.remove('has-error');
+                }
+            }
+        }
+        
+        static validateAll() {
+            return true;
+        }
+        
+        static getShortName(fullName) {
+            const parts = fullName.split(' ');
+            if (parts.length >= 3) {
+                return parts[0] + ' ' + parts[1][0] + '.' + parts[2][0] + '.';
+            } else if (parts.length === 2) {
+                return parts[0] + ' ' + parts[1][0] + '.';
+            }
+            return fullName;
+        }
+        
+        static getDativeName(fullName) {
+            return NameDeclension.toDative(fullName);
+        }
+        
+        static getAccusativeName(fullName) {
+            return NameDeclension.toAccusative(fullName);
+        }
+        
+        static getGenitiveName(fullName) {
+            return NameDeclension.toGenitive(fullName);
+        }
+        
+        static capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        
+        static getPositionForm(position, caseType) {
+            const lowerPosition = position.toLowerCase();
+            const forms = CONFIG.positions[caseType];
+            
+            for (const [key, value] of Object.entries(forms)) {
+                if (lowerPosition.includes(key)) {
+                    return value;
+                }
+            }
+            
+            return position;
+        }
+        
+        static updateUI() {
+            document.getElementById('worker-name').value = this.data.workerName;
+            document.getElementById('worker-position').value = this.data.workerPosition;
+            document.getElementById('worker-department').value = this.data.workerDepartment;
+            document.getElementById('internship-start-date').value = this.data.internshipStartDate;
+            document.getElementById('employment-date').value = this.data.employmentDate;
+            document.getElementById('document-date').value = this.data.documentDate;
+            
+            const supervisors = SupervisorManager.getSupervisors();
+            if (supervisors.length > 0) {
+                const firstSupervisor = supervisors[0];
+                const option = SupervisorManager.supervisorOptions.find(
+                    opt => opt.value === firstSupervisor.name
+                );
+                if (option) {
+                    document.getElementById('supervisor-name-1').value = option.display;
+                }
+                document.getElementById('supervisor-position-1').value = firstSupervisor.position;
+                document.getElementById('supervisor-department-1').value = firstSupervisor.department;
+                
+                const printElement = document.getElementById('supervisor-print-name-1');
+                if (printElement) {
+                    printElement.textContent = firstSupervisor.name;
+                }
+            }
+            
+            const scheduleModeInput = document.getElementById(`schedule-${this.data.scheduleMode}`);
+            if (scheduleModeInput) {
+                scheduleModeInput.checked = true;
+            }
+            
+            this.updateDocumentDateDisplay();
+            this.updateInternshipDatesDisplay();
+            this.updateDocuments();
+            this.updateAutoNames();
+            this.updatePrintValues();
+        }
+        
+        static updateDocuments() {
+            const knowledgeCheckDate = this.calculateKnowledgeCheckDate();
+            const documentDateRussian = DateFormatter.toRussian(this.data.documentDate);
+            
+            const supervisors = SupervisorManager.getSupervisors();
+            const storedNames = NameEditor.loadFromStorage();
+            
+            const positionDat = this.getPositionForm(this.data.workerPosition, 'dat');
+            const positionAcc = this.getPositionForm(this.data.workerPosition, 'acc');
+            
+            const dativeName = this.getDativeName(this.data.workerName);
+            const accusativeName = this.getAccusativeName(this.data.workerName);
+            
+            // Обновляем Распоряжение
+            const orderName1Display = document.getElementById('order-name-1-display');
+            if (orderName1Display) {
+                if (storedNames['order-name-1']) {
+                    orderName1Display.textContent = storedNames['order-name-1'];
+                } else {
+                    orderName1Display.textContent = dativeName;
+                }
+            }
+            
+            const orderPosition1Display = document.getElementById('order-position-1-display');
+            if (orderPosition1Display) {
+                if (storedNames['order-position-1']) {
+                    orderPosition1Display.textContent = storedNames['order-position-1'];
+                } else {
+                    orderPosition1Display.textContent = positionDat;
+                }
+            }
+            
+            const orderName3Display = document.getElementById('order-name-3-display');
+            if (orderName3Display) {
+                if (storedNames['order-name-3']) {
+                    orderName3Display.textContent = storedNames['order-name-3'];
+                } else {
+                    orderName3Display.textContent = dativeName;
+                }
+            }
+            
+            const orderPosition3Display = document.getElementById('order-position-3-display');
+            if (orderPosition3Display) {
+                if (storedNames['order-position-3']) {
+                    orderPosition3Display.textContent = storedNames['order-position-3'];
+                } else {
+                    orderPosition3Display.textContent = positionDat;
+                }
+            }
+            
+            document.getElementById('order-date-display').textContent = `от ${documentDateRussian} г.`;
+            document.getElementById('order-document-date').textContent = documentDateRussian + ' г.';
+            document.getElementById('knowledge-check-date').textContent = knowledgeCheckDate + ' г.';
+            
+            let periodText = "";
+            if (this.data.scheduleMode === "1-3" || this.data.scheduleMode === "gbr") {
+                periodText = `с ${DateFormatter.toRussian(this.data.internshipStartDate)} г. по ${DateFormatter.toRussian(this.data.internshipEndDate)} г.`;
+            } else {
+                // Для ВАХТЫ показываем только даты дней
+                periodText = `${this.data.internshipDatesDisplay.replace(/\.$/, '')}`;
+            }
+            document.getElementById('order-internship-period').textContent = periodText;
+            
+            const orderItem4 = document.getElementById('order-item-4');
+            if (orderItem4) {
+                let supervisorsText = '';
+                
+                if (supervisors.length === 1) {
+                    const firstSupervisor = supervisors[0];
+                    supervisorsText = `Ответственным за стажировку назначается ${firstSupervisor.position}: ${firstSupervisor.name}.`;
+                } else if (supervisors.length === 2) {
+                    const firstSupervisor = supervisors[0];
+                    const secondSupervisor = supervisors[1];
+                    supervisorsText = `Ответственными за стажировку назначается ${firstSupervisor.position}: ${firstSupervisor.name}, ${secondSupervisor.position}: ${secondSupervisor.name}.`;
+                } else if (supervisors.length === 3) {
+                    const firstSupervisor = supervisors[0];
+                    const secondSupervisor = supervisors[1];
+                    const thirdSupervisor = supervisors[2];
+                    supervisorsText = `Ответственными за стажировку назначается ${firstSupervisor.position}: ${firstSupervisor.name}, ${secondSupervisor.position}: ${secondSupervisor.name}, ${thirdSupervisor.position}: ${thirdSupervisor.name}.`;
+                }
+                
+                orderItem4.innerHTML = `<span class="order-item-number">4.</span> ${supervisorsText}`;
+            }
+            
+            this.updateAcquaintedList();
+            
+            document.getElementById('acquainted-position-order').textContent = this.capitalizeFirstLetter(this.data.workerPosition);
+            document.getElementById('acquainted-name-order').textContent = this.getShortName(this.data.workerName);
+            
+            if (supervisors.length > 0) {
+                const firstSupervisor = supervisors[0];
+                document.getElementById('order-supervisor-name').textContent = SupervisorManager.getShortName(firstSupervisor.name);
+            }
+            
+            // Обновляем Приказ
+            const prikazNameDisplay = document.getElementById('prikaz-name-display');
+            if (prikazNameDisplay) {
+                if (storedNames['prikaz-name']) {
+                    prikazNameDisplay.textContent = storedNames['prikaz-name'];
+                } else {
+                    prikazNameDisplay.textContent = accusativeName;
+                }
+            }
+            
+            const prikazPositionDisplay = document.getElementById('prikaz-position-display');
+            if (prikazPositionDisplay) {
+                if (storedNames['prikaz-position']) {
+                    prikazPositionDisplay.textContent = storedNames['prikaz-position'];
+                } else {
+                    prikazPositionDisplay.textContent = positionAcc;
+                }
+            }
+            
+            document.getElementById('prikaz-date').textContent = `от ${DateFormatter.toRussian(this.data.employmentDate)} г.`;
+            document.getElementById('prikaz-employment-date').textContent = `${DateFormatter.toRussian(this.data.employmentDate)} г.`;
+            document.getElementById('prikaz-document-date').textContent = documentDateRussian + ' г.';
+            
+            document.getElementById('acquainted-position-prikaz').textContent = this.capitalizeFirstLetter(this.data.workerPosition);
+            document.getElementById('acquainted-name-prikaz').textContent = this.getShortName(this.data.workerName);
+            
+            document.getElementById('aria-status').textContent = 'Документ обновлен';
+            
+            this.showUpdateNotice();
+        }
+        
+        static updateAcquaintedList() {
+            const supervisors = SupervisorManager.getSupervisors();
+            if (supervisors.length > 0) {
+                const firstSupervisor = supervisors[0];
+                const positionElement = document.getElementById('acquainted-position-supervisor-1');
+                if (positionElement) {
+                    positionElement.textContent = firstSupervisor.position;
+                }
+            }
+            
+            const secondContainer = document.getElementById('second-supervisor-acquainted-container');
+            const thirdContainer = document.getElementById('third-supervisor-acquainted-container');
+            
+            if (!secondContainer || !thirdContainer) return;
+            
+            secondContainer.innerHTML = '';
+            thirdContainer.innerHTML = '';
+            
+            if (supervisors.length > 1) {
+                const secondSupervisor = supervisors[1];
+                const shortName = SupervisorManager.getShortName(secondSupervisor.name);
+                
+                const item = document.createElement('div');
+                item.className = 'acquainted-item';
+                item.innerHTML = `
+                    <div class="acquainted-position">${secondSupervisor.position}</div>
+                    <div class="acquainted-signature"></div>
+                    <div>${shortName}</div>
+                `;
+                
+                secondContainer.appendChild(item);
+            }
+            
+            if (supervisors.length > 2) {
+                const thirdSupervisor = supervisors[2];
+                const shortName = SupervisorManager.getShortName(thirdSupervisor.name);
+                
+                const item = document.createElement('div');
+                item.className = 'acquainted-item';
+                item.innerHTML = `
+                    <div class="acquainted-position">${thirdSupervisor.position}</div>
+                    <div class="acquainted-signature"></div>
+                    <div>${shortName}</div>
+                `;
+                
+                thirdContainer.appendChild(item);
+            }
+        }
+        
+        static showUpdateNotice() {
+            const notice = document.getElementById('update-notice');
+            notice.classList.add('show');
+            
+            setTimeout(() => {
+                notice.classList.remove('show');
+            }, 3000);
+        }
+        
+        static clearAllData() {
+            if (confirm('Вы уверены, что хотите очистить все данные?')) {
+                this.data = {
+                    workerName: "Карпеева Галина Александровна",
+                    workerPosition: "охранник",
+                    workerDepartment: "Охранники",
+                    workerSurname: "Карпеева",
+                    internshipStartDate: "2026-01-20",
+                    internshipEndDate: "2026-01-27",
+                    employmentDate: "2026-01-28",
+                    internshipDatesDisplay: "20.01.2026-21.01.2026г, 23.01.2026-24.01.2026г, 26.01.2026-27.01.2026г.",
+                    scheduleMode: "1-3",
+                    documentDate: "2026-01-11",
+                    knowledgeCheckDate: "2026-01-14"
+                };
+                
+                SupervisorManager.supervisors = [
+                    {
+                        id: 1,
+                        name: "Кузьмина Светлана Павловна",
+                        position: "Начальник смены охраны",
+                        department: "дежурная часть"
+                    }
+                ];
+                
+                this.clearStorage();
+                SupervisorManager.saveToStorage();
+                this.updateUI();
+                SupervisorManager.updateUI();
+                
+                const storedNames = NameEditor.loadFromStorage();
+                Object.keys(storedNames).forEach(elementId => {
+                    const element = document.getElementById(elementId + '-display');
+                    if (element) {
+                        element.textContent = '';
+                    }
+                });
+                NameEditor.clearStorage();
+                
+                DataManager.updateAutoNames();
+                DataManager.updatePrintValues();
+                DataManager.updateDocuments();
+                
+                Notification.show('Все данные очищены', 'info');
+            }
+        }
+        
+        static debouncedUpdate = this.debounce(() => {
+            this.updateDocuments();
+        }, 500);
+        
+        static debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+    }
+
+    // Класс для управления документами
+    class DocumentManager {
+        static showDocument(documentId) {
+            const documents = document.querySelectorAll('.document-container');
+            documents.forEach(doc => {
+                doc.classList.remove('active');
+                doc.setAttribute('aria-hidden', 'true');
+            });
+            
+            const activeDoc = document.getElementById(documentId);
+            activeDoc.classList.add('active');
+            activeDoc.setAttribute('aria-hidden', 'false');
+            
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+                button.setAttribute('aria-selected', 'false');
+            });
+            
+            const activeButton = event.target;
+            activeButton.classList.add('active');
+            activeButton.setAttribute('aria-selected', 'true');
+            
+            activeDoc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        static printAll() {
+            console.log('Кнопка печати нажата!');
+            
+            DataManager.updateUI();
+            
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+    }
+
+    // Главный класс приложения
+    class App {
+        static async saveToDoc() {
+            try {
+                if (!DataManager.validateAll()) {
+                    Notification.show('Пожалуйста, исправьте ошибки перед обновлением', 'error', 5000);
+                    return;
+                }
+                
+                this.showLoading('Обновление документа...');
+                
+                const data = DataManager.data;
+                
+                const knowledgeCheckDate = DataManager.calculateKnowledgeCheckDate();
+                
+                const formattedData = {
+                    workerName: data.workerName,
+                    workerPosition: data.workerPosition,
+                    workerDepartment: data.workerDepartment,
+                    workerSurname: data.workerSurname,
+                    internshipStartDate: DateFormatter.toRussian(data.internshipStartDate),
+                    internshipEndDate: DateFormatter.toRussian(data.internshipEndDate),
+                    employmentDate: DateFormatter.toRussian(data.employmentDate),
+                    internshipDatesDisplay: data.internshipDatesDisplay,
+                    knowledgeCheckDate: knowledgeCheckDate,
+                    documentDate: data.documentDate
+                };
+                
+                DataManager.saveToStorage();
+                SupervisorManager.saveToStorage();
+                
+                const fileName = this.generateFileName(formattedData);
+                
+                const rtfContent = this.createRTFDocument(formattedData);
+                
+                const blob = new Blob(['\ufeff' + rtfContent], { 
+                    type: 'application/msword'
+                });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                    this.hideLoading();
+                    Notification.show(`Документ обновлен: ${fileName}`, 'success');
+                }, 100);
+                
+            } catch (error) {
+                console.error('Ошибка при обновлении файла:', error);
+                this.hideLoading();
+                Notification.show('Произошла ошибка при обновлении файла', 'error', 5000);
+            }
+        }
+        
+        static createRTFDocument(data) {
+            const dativeName = DataManager.getDativeName(data.workerName);
+            const accusativeName = DataManager.getAccusativeName(data.workerName);
+            const positionDat = DataManager.getPositionForm(data.workerPosition, 'dat');
+            const positionAcc = DataManager.getPositionForm(data.workerPosition, 'acc');
+            const shortName = DataManager.getShortName(data.workerName);
+            const documentDate = DateFormatter.toRussian(data.documentDate);
+            const supervisors = SupervisorManager.getSupervisorsForRTF();
+            
+            let rtf = '{\\rtf1\\ansi\\ansicpg1251\\deff0\\nouicompat\\deflang1049{\\fonttbl{\\f0\\fnil\\fcharset204 Times New Roman;}}';
+            rtf += '\\viewkind4\\uc1\\pard\\f0\\fs22\\sl240\\slmult1\\par';
+            
+            // Стажировочный лист
+            rtf += '\\qc\\b\\fs24 ' + this.encodeRtfText('СТАЖИРОВОЧНЫЙ ЛИСТ') + '\\b0\\fs22\\par';
+            rtf += '\\qc ' + this.encodeRtfText('работника, прошедшего стажировку на рабочем месте') + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\qr ' + this.encodeRtfText('г. Нижнекамск') + '\\tab ' + this.encodeRtfText(documentDate + ' г.') + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\b ' + this.encodeRtfText('Организация:') + '\\b0\\tab ' + this.encodeRtfText(CONFIG.company.name) + '\\par';
+            rtf += '\\par';
+            rtf += '\\b ' + this.encodeRtfText('Сведения о проходящем стажировку') + '\\b0\\par';
+            rtf += '\\pard\\par';
+            rtf += this.encodeRtfText('Фамилия, имя, отчество (при наличии):') + '\\tab ' + this.encodeRtfText(data.workerName) + '\\par';
+            rtf += this.encodeRtfText('Профессия или должность работника:') + '\\tab ' + this.encodeRtfText(DataManager.capitalizeFirstLetter(data.workerPosition)) + '\\par';
+            rtf += this.encodeRtfText('Наименование структурного подразделения:') + '\\tab ' + this.encodeRtfText(data.workerDepartment) + '\\par';
+            rtf += this.encodeRtfText('Подпись:') + '\\tab \\par';
+            rtf += '\\par';
+            rtf += '\\b ' + this.encodeRtfText('Сведения о руководителе стажировки') + '\\b0\\par';
+            rtf += '\\pard\\par';
+            
+            supervisors.forEach((supervisor, index) => {
+                rtf += this.encodeRtfText('Фамилия, имя, отчество (при наличии):') + '\\tab ' + this.encodeRtfText(supervisor.name || '') + '\\par';
+                rtf += this.encodeRtfText('Профессия или должность работника:') + '\\tab ' + this.encodeRtfText(supervisor.position || '') + '\\par';
+                rtf += this.encodeRtfText('Наименование структурного подразделения:') + '\\tab ' + this.encodeRtfText(supervisor.department || '') + '\\par';
+                rtf += this.encodeRtfText('Подпись:') + '\\tab \\par';
+                if (index < supervisors.length - 1) {
+                    rtf += '\\par';
+                }
+            });
+            
+            rtf += '\\par';
+            rtf += '\\b ' + this.encodeRtfText('Основание для проведения стажировки на рабочем месте:') + '\\b0\\par';
+            rtf += this.encodeRtfText('Распоряжение «О направлении на обучение по охране труда и стажировку» № ____ от _______г.') + '\\par';
+            rtf += '\\par';
+            rtf += '\\b ' + this.encodeRtfText('Количество смен стажировки на рабочем месте:') + '\\b0\\par';
+            rtf += this.encodeRtfText('3 смены') + '\\par';
+            rtf += '\\par';
+            rtf += '\\b ' + this.encodeRtfText('Период проведения стажировки на рабочем месте:') + '\\b0\\par';
+            rtf += this.encodeRtfText(data.internshipDatesDisplay) + '\\par';
+            rtf += '\\par';
+            rtf += '\\b ' + this.encodeRtfText('Дата допуска работника к самостоятельной работе:') + '\\b0\\par';
+            rtf += '\\b ' + this.encodeRtfText(data.employmentDate + ' г.') + '\\b0\\par';
+            rtf += '\\page';
+            
+            // Распоряжение
+            rtf += '\\pard\\qc\\b\\fs20 ' + this.encodeRtfText('Общество с ограниченной ответственностью') + '\\b0\\fs22\\par';
+            rtf += '\\b\\fs20 ' + this.encodeRtfText('«Негосударственное охранное предприятие') + '\\b0\\fs22\\par';
+            rtf += '\\b\\fs20 ' + this.encodeRtfText('«Сибирь-ТНХ»') + '\\b0\\fs22\\par';
+            rtf += '\\b\\fs20 ' + this.encodeRtfText('(ООО «НОП «Сибирь-ТНХ»)') + '\\b0\\fs22\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\qc\\fs20 ' + this.encodeRtfText(CONFIG.company.address) + '\\fs22\\par';
+            rtf += this.encodeRtfText(CONFIG.company.phone) + '\\par';
+            rtf += this.encodeRtfText('e-mail: ' + CONFIG.company.email) + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\qc\\fs20 ' + this.encodeRtfText('ИНН ' + CONFIG.company.inn + ', КПП ' + CONFIG.company.kpp) + '\\fs22\\par';
+            rtf += this.encodeRtfText('ОГРН ' + CONFIG.company.ogrn + ', ОКВЭД ' + CONFIG.company.okved) + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\qc\\b\\fs24 ' + this.encodeRtfText('РАСПОРЯЖЕНИЕ') + '\\b0\\fs22\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\fi-360\\li360 ' + this.encodeRtfText('г. Нижнекамск') + '\\tab\\tab ' + this.encodeRtfText('от ' + documentDate + ' г.') + '\\tab\\tab ' + this.encodeRtfText('№ _______') + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\qc\\b\\fs20 ' + this.encodeRtfText('«О направлении на обучение по охране труда и стажировку»') + '\\b0\\fs22\\par';
+            rtf += '\\pard\\par';
+            rtf += this.encodeRtfText('В соответствии с требованиями Постановления Правительства РФ от 24.12.2021 № 2464 «О порядке обучения по охране труда и проверки знания требований охраны труда», в целях проведения обучения и стажировки вновь принятого работника,') + '\\par';
+            rtf += '\\par';
+            rtf += '\\pard\\qc\\b ' + this.encodeRtfText('Обязываю:') + '\\b0\\par';
+            rtf += '\\pard\\par';
+            rtf += this.encodeRtfText('1. Назначить обучение с ' + documentDate + ' г. ' + positionDat + ' ' + dativeName + ' на рабочем месте оборудованном в соответствии с п. 98 Постановления Правительства РФ от 24.12.2021 № 2464 «О порядке обучения по охране труда и проверки знания требований охраны труда».') + '\\par';
+            rtf += '\\par';
+            rtf += this.encodeRtfText('2. Назначить проверку знаний требований охраны труда ' + data.knowledgeCheckDate + ' г.') + '\\par';
+            rtf += '\\par';
+            rtf += this.encodeRtfText('3. После проведения первичного инструктажа на рабочем месте, обучения требованиям охраны труда и проверки знания требований охраны труда назначить проведение стажировки ' + positionDat + ' ' + dativeName + ' в период ' + data.internshipDatesDisplay.replace(/\.$/, '') + ' (3 рабочие смены).') + '\\par';
+            rtf += '\\par';
+            
+            if (supervisors.length === 1) {
+                const firstSupervisor = supervisors[0];
+                rtf += this.encodeRtfText(`4. Ответственным за стажировку назначается ${firstSupervisor.position}: ${firstSupervisor.name}.`) + '\\par';
+            } else if (supervisors.length === 2) {
+                const firstSupervisor = supervisors[0];
+                const secondSupervisor = supervisors[1];
+                rtf += this.encodeRtfText(`4. Ответственными за стажировку назначается ${firstSupervisor.position}: ${firstSupervisor.name}, ${secondSupervisor.position}: ${secondSupervisor.name}.`) + '\\par';
+            } else if (supervisors.length === 3) {
+                const firstSupervisor = supervisors[0];
+                const secondSupervisor = supervisors[1];
+                const thirdSupervisor = supervisors[2];
+                rtf += this.encodeRtfText(`4. Ответственными за стажировку назначается ${firstSupervisor.position}: ${firstSupervisor.name}, ${secondSupervisor.position}: ${secondSupervisor.name}, ${thirdSupervisor.position}: ${thirdSupervisor.name}.`) + '\\par';
+            }
+            
+            rtf += '\\par';
+            rtf += this.encodeRtfText('5. Ответственному за стажировку оформить прохождение стажировки в стажировочном листе и передать ведущему специалисту по охране труда Бикметову Р.Т.') + '\\par';
+            rtf += '\\par';
+            rtf += this.encodeRtfText('6. Ведущему специалисту по охране труда Бикметову Р.Т. обеспечить хранение стажировочного листа.') + '\\par';
+            rtf += '\\par';
+            rtf += this.encodeRtfText('7. Контроль за исполнением распоряжения оставляю за собой.') + '\\par';
+            rtf += '\\par';
+            rtf += '\\pard\\fi-360\\li360\\b\\i ' + this.encodeRtfText('Заместитель директора') + '\\i0\\b0\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab ' + this.encodeRtfText('Хайрутдинов А.Б.') + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\fi-360\\li360\\b ' + this.encodeRtfText('С приказом ознакомлены:') + '\\b0\\par';
+            rtf += '\\pard\\par';
+            
+            supervisors.forEach(supervisor => {
+                const shortName = SupervisorManager.getShortName(supervisor.name);
+                rtf += this.encodeRtfText(supervisor.position) + '\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab ' + this.encodeRtfText(shortName) + '\\par';
+            });
+            
+            rtf += this.encodeRtfText('Ведущий специалист по охране труда') + '\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab ' + this.encodeRtfText('Бикметов Р.Т.') + '\\par';
+            rtf += this.encodeRtfText(DataManager.capitalizeFirstLetter(data.workerPosition)) + '\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab ' + this.encodeRtfText(shortName) + '\\par';
+            rtf += '\\page';
+            
+            // Приказ
+            rtf += '\\pard\\qc\\b\\fs20 ' + this.encodeRtfText('Общество с ограниченной ответственностью') + '\\b0\\fs22\\par';
+            rtf += '\\b\\fs20 ' + this.encodeRtfText('«Негосударственное охранное предприятие') + '\\b0\\fs22\\par';
+            rtf += '\\b\\fs20 ' + this.encodeRtfText('«Сибирь-ТНХ»') + '\\b0\\fs22\\par';
+            rtf += '\\b\\fs20 ' + this.encodeRtfText('(ООО «НОП «Сибирь-ТНХ»)') + '\\b0\\fs22\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\qc\\fs20 ' + this.encodeRtfText(CONFIG.company.address) + '\\fs22\\par';
+            rtf += this.encodeRtfText(CONFIG.company.phone) + '\\par';
+            rtf += this.encodeRtfText('e-mail: ' + CONFIG.company.email) + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\qc\\fs20 ' + this.encodeRtfText('ИНН ' + CONFIG.company.inn + ', КПП ' + CONFIG.company.kpp) + '\\fs22\\par';
+            rtf += this.encodeRtfText('ОГРН ' + CONFIG.company.ogrn + ', ОКВЭД ' + CONFIG.company.okved) + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\qc\\b\\fs24 ' + this.encodeRtfText('П Р И К А З') + '\\b0\\fs22\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\fi-360\\li360 ' + this.encodeRtfText('г. Нижнекамск') + '\\tab\\tab ' + this.encodeRtfText('от ' + data.employmentDate + ' г.') + '\\tab\\tab ' + this.encodeRtfText('№ _______') + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\qc\\b\\fs20 ' + this.encodeRtfText('«О допуске к самостоятельной работе»') + '\\b0\\fs22\\par';
+            rtf += '\\pard\\par';
+            rtf += this.encodeRtfText('После прохождения инструктажей, обучения и проверки знания требований охраны труда и стажировки на рабочем месте') + '\\par';
+            rtf += '\\par';
+            rtf += '\\pard\\qc\\b ' + this.encodeRtfText('ПРИКАЗЫВАЮ:') + '\\b0\\par';
+            rtf += '\\pard\\par';
+            rtf += this.encodeRtfText('1. Допустить к самостоятельному исполнению своих должностных обязанностей ' + positionAcc + ' ' + accusativeName + ' с ' + data.employmentDate + ' г.') + '\\par';
+            rtf += '\\par';
+            rtf += '\\i ' + this.encodeRtfText('Основание: стажировочный лист от ' + documentDate + ' г.') + '\\i0\\par';
+            rtf += '\\par';
+            rtf += this.encodeRtfText('2. Контроль за исполнением приказа оставляю за собой.') + '\\par';
+            rtf += '\\par';
+            rtf += '\\pard\\fi-360\\li360\\b\\i ' + this.encodeRtfText('Заместитель директора') + '\\i0\\b0\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab ' + this.encodeRtfText('Хайрутдинов А.Б.') + '\\par';
+            rtf += '\\pard\\par';
+            rtf += '\\pard\\fi-360\\li360\\b ' + this.encodeRtfText('С приказом ознакомлены:') + '\\b0\\par';
+            rtf += '\\pard\\par';
+            rtf += this.encodeRtfText(DataManager.capitalizeFirstLetter(data.workerPosition)) + '\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab\\tab ' + this.encodeRtfText(shortName) + '\\par';
+            rtf += '}';
+            
+            return rtf;
+        }
+        
+        static encodeRtfText(text) {
+            if (!text) return '';
+            
+            let encoded = text.replace(/\\/g, '\\\\')
+                             .replace(/\{/g, '\\{')
+                             .replace(/\}/g, '\\}')
+                             .replace(/\t/g, '\\tab ')
+                             .replace(/\n/g, '\\par ');
+            
+            encoded = encoded.replace(/[а-яА-ЯёЁ]/g, char => {
+                const code = char.charCodeAt(0);
+                return `\\'${code.toString(16).padStart(2, '0')}`;
+            });
+            
+            return encoded;
+        }
+        
+        static generateFileName(data) {
+            const nsoSurname = 'Кузьмина';
+            const date = data.employmentDate.replace(/\./g, '-');
+            return `документы вновь принятых ${date} НСО ${nsoSurname} ${data.workerSurname}.doc`;
+        }
+        
+        static showLoading(message = 'Обновление...') {
+            const overlay = document.getElementById('loading-overlay');
+            const text = document.getElementById('loading-text');
+            
+            if (overlay && text) {
+                text.textContent = message;
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        static hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            
+            if (overlay) {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        static clearCache() {
+            if (confirm('Вы уверены, что хотите очистить кэш и сбросить все данные к значениям по умолчанию?')) {
+                DataManager.clearStorage();
+                NameEditor.clearStorage();
+                
+                DataManager.data = {
+                    workerName: "Карпеева Галина Александровна",
+                    workerPosition: "охранник",
+                    workerDepartment: "Охранники",
+                    workerSurname: "Карпеева",
+                    internshipStartDate: "2026-01-20",
+                    internshipEndDate: "2026-01-27",
+                    employmentDate: "2026-01-28",
+                    internshipDatesDisplay: "20.01.2026-21.01.2026г, 23.01.2026-24.01.2026г, 26.01.2026-27.01.2026г.",
+                    scheduleMode: "1-3",
+                    documentDate: "2026-01-11",
+                    knowledgeCheckDate: "2026-01-14"
+                };
+                
+                SupervisorManager.supervisors = [
+                    {
+                        id: 1,
+                        name: "Кузьмина Светлана Павловна",
+                        position: "Начальник смены охраны",
+                        department: "дежурная часть"
+                    }
+                ];
+                
+                DataManager.saveToStorage();
+                SupervisorManager.saveToStorage();
+                
+                DataManager.updateUI();
+                SupervisorManager.updateUI();
+                
+                const storedNames = NameEditor.loadFromStorage();
+                Object.keys(storedNames).forEach(elementId => {
+                    const element = document.getElementById(elementId + '-display');
+                    if (element) {
+                        element.textContent = '';
+                    }
+                });
+                NameEditor.clearStorage();
+                
+                DataManager.updateAutoNames();
+                DataManager.updatePrintValues();
+                DataManager.updateDocuments();
+                
+                Notification.show('Кэш очищен. Все данные сброшены к значениям по умолчанию', 'success');
+            }
+        }
+        
+        static init() {
+            DataManager.init();
+            
+            const workerNameInput = document.getElementById('worker-name');
+            if (workerNameInput) {
+                workerNameInput.addEventListener('input', DataManager.debounce((e) => {
+                    DataManager.updateWorkerName(e.target.value);
+                }, 300));
+            }
+            
+            setTimeout(() => {
+                if (workerNameInput) {
+                    workerNameInput.focus();
+                }
+            }, 100);
+            
+            console.log('Приложение инициализировано');
+        }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        App.init();
+    });
+</script>
+</body>
+</html>

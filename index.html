@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Единая система охраны труда и кадрового учёта</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e9eef3;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .tabs-master {
+            background: #1e2a3e;
+            color: white;
+            padding: 0 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .tabs-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .tab-master-btn {
+            background: #2c3e50;
+            border: none;
+            color: #ecf0f1;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 12px 12px 0 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .tab-master-btn i {
+            font-size: 1.2rem;
+        }
+
+        .tab-master-btn:hover {
+            background: #3b5a7c;
+            color: white;
+        }
+
+        .tab-master-btn.active {
+            background: #f4f7fc;
+            color: #1e2a3e;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .page-container {
+            flex: 1;
+            background: #eef2f5;
+            position: relative;
+        }
+
+        .tab-page {
+            display: none;
+            width: 100%;
+            height: calc(100vh - 70px);
+            background: white;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .tab-page.active-page {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .iframe-wrapper {
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            display: block;
+        }
+
+        .error-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            color: #721c24;
+        }
+
+        .error-message i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #e74c3c;
+        }
+
+        .error-message h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .error-message p {
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 700px) {
+            .tabs-container {
+                justify-content: center;
+            }
+            .tab-master-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+            .tab-page {
+                height: calc(100vh - 60px);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="tabs-master">
+    <div class="tabs-container">
+        <button class="tab-master-btn active" data-tab="tab1" data-file="ОТ онлайн.html">
+            <i class="fas fa-user-shield"></i> Охрана труда (контроль инструктажей)
+        </button>
+        <button class="tab-master-btn" data-tab="tab2" data-file="Календарь с НСО.html">
+            <i class="fas fa-calendar-alt"></i> Календарь с заметками / НСО
+        </button>
+        <button class="tab-master-btn" data-tab="tab3" data-file="стаж_лист_последний_вариант 3 графика.html">
+            <i class="fas fa-file-signature"></i> Стажировочный лист / Распоряжение / Приказ
+        </button>
+    </div>
+</div>
+
+<div class="page-container">
+    <div class="tab-page active-page" id="tab1">
+        <div class="iframe-wrapper">
+            <iframe id="iframe1" src="ОТ онлайн.html" onerror="showError(this)"></iframe>
+        </div>
+    </div>
+    <div class="tab-page" id="tab2">
+        <div class="iframe-wrapper">
+            <iframe id="iframe2" src="Календарь с НСО.html" onerror="showError(this)"></iframe>
+        </div>
+    </div>
+    <div class="tab-page" id="tab3">
+        <div class="iframe-wrapper">
+            <iframe id="iframe3" src="стаж_лист_последний_вариант 3 графика.html" onerror="showError(this)"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функция для отображения ошибки загрузки iframe
+    function showError(iframe) {
+        const wrapper = iframe.parentElement;
+        if (!wrapper.querySelector('.error-message')) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <i class="fas fa-file-excel"></i>
+                <h3>Файл не найден</h3>
+                <p>Убедитесь, что файл <strong>${iframe.src.split('/').pop()}</strong> находится в той же папке, что и главная страница.</p>
+                <p style="margin-top: 10px; font-size: 12px;">Путь: ${iframe.src}</p>
+            `;
+            iframe.style.display = 'none';
+            wrapper.appendChild(errorDiv);
+        }
+    }
+
+    // Переключение вкладок с динамической загрузкой iframe
+    const tabs = document.querySelectorAll('.tab-master-btn');
+    const pages = document.querySelectorAll('.tab-page');
+    const iframes = {
+        tab1: document.getElementById('iframe1'),
+        tab2: document.getElementById('iframe2'),
+        tab3: document.getElementById('iframe3')
+    };
+
+    // Функция для принудительной перезагрузки iframe при переключении (опционально)
+    function reloadIframe(iframe) {
+        if (iframe && iframe.src && !iframe.src.includes('about:blank')) {
+            const currentSrc = iframe.src;
+            iframe.src = '';
+            iframe.src = currentSrc;
+        }
+    }
+
+    function switchTab(tabId) {
+        // Скрываем все страницы
+        pages.forEach(page => page.classList.remove('active-page'));
+        
+        // Показываем выбранную
+        const activePage = document.getElementById(tabId);
+        if (activePage) activePage.classList.add('active-page');
+        
+        // Обновляем активную кнопку
+        tabs.forEach(btn => btn.classList.remove('active'));
+        const activeBtn = Array.from(tabs).find(btn => btn.getAttribute('data-tab') === tabId);
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        // Опционально: перезагружаем iframe для корректной работы скриптов
+        // (некоторые страницы могут требовать перезагрузки при повторном показе)
+        const iframe = iframes[tabId];
+        if (iframe && iframe.src && !iframe.src.includes('about:blank')) {
+            // Небольшая задержка для плавности
+            setTimeout(() => {
+                try {
+                    // Проверяем, загрузился ли iframe корректно
+                    if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                        // Всё хорошо
+                    }
+                } catch(e) {
+                    // Если ошибка доступа (cross-origin) - игнорируем
+                }
+            }, 100);
+        }
+    }
+
+    // Обработчики кликов по вкладкам
+    tabs.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tabId = btn.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+
+    // Обработка ошибок загрузки iframe (если файлы не найдены)
+    window.addEventListener('load', () => {
+        // Проверяем каждый iframe на возможность загрузки
+        for (const [tabId, iframe] of Object.entries(iframes)) {
+            if (iframe) {
+                iframe.onerror = function() { showError(this); };
+                iframe.onload = function() {
+                    // Если загрузилось успешно, удаляем сообщение об ошибке если было
+                    const wrapper = this.parentElement;
+                    const errorMsg = wrapper.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                        this.style.display = 'block';
+                    }
+                };
+            }
+        }
+        
+        console.log('Главная страница загружена. Файлы должны лежать в одной папке:');
+        console.log('- ОТ онлайн.html');
+        console.log('- Календарь с НСО.html');
+        console.log('- стаж_лист_последний_вариант 3 графика.html');
+    });
+</script>
+</body>
+</html>

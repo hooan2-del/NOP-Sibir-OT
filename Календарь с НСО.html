@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь с заметками</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-content {
+            flex-grow: 1;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .print-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .print-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .calendar-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .notes-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .current-month {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .nav-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day-name {
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+
+        .day-name.weekend {
+            color: #e74c3c;
+        }
+
+        .day-cell {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .day-cell:hover {
+            background-color: #e8f4fc;
+            transform: translateY(-2px);
+        }
+
+        .day-cell.today {
+            background-color: #e1f5fe;
+            border: 2px solid #3498db;
+        }
+
+        .day-cell.selected {
+            background-color: #3498db;
+            color: white;
+        }
+
+        /* Выходные дни - подсветка красным */
+        .day-cell.weekend {
+            background-color: #fff5f5;
+        }
+
+        .day-cell.weekend:hover {
+            background-color: #ffeaea;
+        }
+
+        .day-cell.weekend.selected {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .day-cell.weekend.today {
+            background-color: #ffeaea;
+            border: 2px solid #e74c3c;
+        }
+
+        .day-number {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .day-notes-preview {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            flex-grow: 1;
+        }
+
+        .day-cell.selected .day-notes-preview {
+            color: #e0e0e0;
+        }
+
+        .day-cell.weekend .day-notes-preview {
+            color: #c0392b;
+        }
+
+        .day-cell.weekend.selected .day-notes-preview {
+            color: #ffcccc;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .selected-date {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .note-form {
+            margin-bottom: 20px;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .add-note-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-note-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .notes-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 400px;
+            padding-right: 5px;
+        }
+
+        .note-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .note-text {
+            flex-grow: 1;
+            word-break: break-word;
+        }
+
+        .note-date {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .edit-note-btn, .delete-note-btn {
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-note-btn {
+            background-color: #3498db;
+        }
+
+        .edit-note-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .delete-note-btn {
+            background-color: #e74c3c;
+        }
+
+        .delete-note-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .empty-notes {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Стили для уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Стили для печати */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .print-content, .print-content * {
+                visibility: visible;
+            }
+            
+            .print-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 15px;
+                font-size: 12px;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .calendar-print {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 4px;
+                margin-bottom: 15px;
+            }
+            
+            .day-cell-print {
+                border: 1px solid #ddd !important;
+                padding: 8px 4px;
+                min-height: 70px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                position: relative;
+                page-break-inside: avoid;
+                background-color: #f8f9fa;
+            }
+            
+            .day-cell-print.weekend {
+                background-color: #fff5f5;
+            }
+            
+            .day-number-print {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 3px;
+            }
+            
+            .notes-preview-print {
+                font-size: 0.65rem;
+                color: #7f8c8d;
+                text-align: left;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                flex-grow: 1;
+            }
+            
+            .notes-count-print {
+                background-color: #2ecc71;
+                color: white;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                font-size: 0.6rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                top: 3px;
+                right: 3px;
+            }
+            
+            .day-cell-print.weekend .notes-count-print {
+                background-color: #e74c3c;
+            }
+            
+            .employees-list {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 5px;
+                margin-top: 20px;
+                page-break-inside: avoid;
+            }
+            
+            .employee-item {
+                font-size: 0.7rem;
+                padding: 3px;
+                border-bottom: 1px dotted #ddd;
+            }
+            
+            .print-header {
+                text-align: center;
+                margin-bottom: 10px;
+                border-bottom: 2px solid #3498db;
+                padding-bottom: 8px;
+            }
+            
+            .print-title {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #2c3e50;
+                margin-bottom: 5px;
+            }
+            
+            .print-date {
+                font-size: 1rem;
+                color: #7f8c8d;
+            }
+            
+            .print-footer {
+                text-align: center;
+                margin-top: 15px;
+                font-size: 0.7rem;
+                color: #7f8c8d;
+                border-top: 1px solid #eee;
+                padding-top: 8px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .day-cell {
+                min-height: 70px;
+                padding: 8px 4px;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .print-btn {
+                align-self: center;
+            }
+            
+            .day-notes-preview {
+                font-size: 0.7rem;
+                -webkit-line-clamp: 2;
+            }
+            
+            .note-actions {
+                flex-direction: column;
+            }
+        }
+
+        .day-cell.other-month {
+            color: #bdc3c7;
+            background-color: #f9f9f9;
+        }
+
+        .day-cell.other-month:hover {
+            background-color: #f0f0f0;
+        }
+
+        .day-cell.other-month.weekend {
+            background-color: #fff0f0;
+        }
+
+        .notes-count {
+            background-color: #2ecc71;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
+        .day-cell.weekend .notes-count {
+            background-color: #e74c3c;
+        }
+        
+        /* Модальное окно для редактирования */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+        
+        .modal-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
+        }
+        
+        .modal-textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .save-btn, .cancel-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            border: none;
+        }
+        
+        .save-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .save-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1><i class="fas fa-calendar-alt"></i> Календарь с заметками</h1>
+                <p class="subtitle">Выберите день и добавьте заметку. Все данные сохраняются в вашем браузере.</p>
+            </div>
+            <button class="print-btn no-print" id="print-btn">
+                <i class="fas fa-print"></i> Распечатать календарь
+            </button>
+        </header>
+        
+        <div class="app-container">
+            <section class="calendar-section">
+                <div class="calendar-header">
+                    <button class="nav-button no-print" id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                    <div class="current-month" id="current-month">Май 2023</div>
+                    <button class="nav-button no-print" id="next-month"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Дни недели -->
+                    <div class="day-name">Пн</div>
+                    <div class="day-name">Вт</div>
+                    <div class="day-name">Ср</div>
+                    <div class="day-name">Чт</div>
+                    <div class="day-name">Пт</div>
+                    <div class="day-name weekend">Сб</div>
+                    <div class="day-name weekend">Вс</div>
+                    
+                    <!-- Ячейки с днями будут добавлены через JavaScript -->
+                </div>
+            </section>
+            
+            <section class="notes-section">
+                <div class="notes-header">
+                    <div class="selected-date" id="selected-date">15 мая 2023</div>
+                </div>
+                
+                <div class="note-form">
+                    <textarea class="note-input" id="note-input" placeholder="Введите вашу заметку для этого дня..."></textarea>
+                    <button class="add-note-btn no-print" id="add-note-btn">
+                        <i class="fas fa-plus"></i> Добавить заметку
+                    </button>
+                </div>
+                
+                <div class="notes-list" id="notes-list">
+                    <!-- Список заметок будет добавляться через JavaScript -->
+                    <div class="empty-notes">Нет заметок для этого дня. Добавьте первую заметку!</div>
+                </div>
+            </section>
+        </div>
+        
+        <div class="footer no-print">
+            <p>© 2023 Календарь с заметками | Все заметки сохраняются локально в вашем браузере</p>
+        </div>
+        
+        <!-- Уведомление о добавлении заметки -->
+        <div class="notification" id="notification">
+            <i class="fas fa-check-circle notification-icon"></i>
+            <span class="notification-text">Заметка успешно добавлена!</span>
+        </div>
+        
+        <!-- Модальное окно для редактирования заметки -->
+        <div class="modal-overlay" id="edit-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">Редактировать заметку</div>
+                    <button class="close-modal" id="close-modal">&times;</button>
+                </div>
+                <textarea class="modal-textarea" id="edit-note-text"></textarea>
+                <div class="modal-actions">
+                    <button class="cancel-btn" id="cancel-edit">Отмена</button>
+                    <button class="save-btn" id="save-edit">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Текущая дата
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        
+        // Хранилище заметок
+        let notes = {};
+        
+        // Переменные для редактирования заметки
+        let currentEditNoteIndex = -1;
+        let currentEditDateKey = '';
+        
+        // Список сотрудников для печати
+        const employeesList = [
+            "1ПЗ 1н Сафин Ильназ Рависович",
+            "1ПЗ 2н Ваганова Эльвира Анатольевна",
+            "1ПЗ 3н Кузьмина Светлана Павловна",
+            "1ПЗ 4н Закирзянов Ринат Гарифзянович",
+            "2ПЗ 1н Кудряшова Гузель Фаритовна",
+            "2ПЗ 2н Шайдуллина Гюзелия Тауфовна",
+            "2ПЗ 3н Хегай Эльвира Ядкаровна",
+            "2ПЗ 4н Бармалеев Виталий Геннадиевич",
+            "СЦ 1н Сергеев Алексей Николаевич",
+            "СЦ 2н Галиев Рашат Азатович",
+            "СЦ 3н Газиева Светлана Владимировна",
+            "СЦ 4н Питеркин Андрей Анатольевич",
+            "гр.Т. 1н Глазунова Ирина Николаевна",
+            "гр.Т. 2н Андрианов Дмитрий Владимирович",
+            "гр.Т. 3н Шарифуллина Ольга Николаевна",
+            "гр.Т. 4н Гурьянов Евгений Иванович",
+            "ДЧ 1н Корнеева Юлия Владимировна",
+            "ДЧ 2н Бондарева Елена Владимировна",
+            "ДЧ 3н Зайнетдинова Любовь Юсуповна",
+            "ДЧ 4н Фатихова Светлана Вячеславовна"
+        ];
+        
+        // Загрузка заметок из localStorage
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('calendarNotes');
+            if (savedNotes) {
+                notes = JSON.parse(savedNotes);
+            }
+        }
+        
+        // Сохранение заметок в localStorage
+        function saveNotes() {
+            localStorage.setItem('calendarNotes', JSON.stringify(notes));
+        }
+        
+        // Форматирование даты в ключ для хранения
+        function getDateKey(date) {
+            return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+        }
+        
+        // Получение названия месяца на русском
+        function getMonthName(monthIndex) {
+            const months = [
+                'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+            return months[monthIndex];
+        }
+        
+        // Получение названия дня недели на русском
+        function getDayName(dayIndex) {
+            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            return days[dayIndex];
+        }
+        
+        // Проверка, является ли день выходным (суббота или воскресенье)
+        function isWeekend(date) {
+            const day = date.getDay();
+            return day === 0 || day === 6; // 0 - воскресенье, 6 - суббота
+        }
+        
+        // Получение первой заметки для дня (для отображения в ячейке календаря)
+        function getFirstNotePreview(dateKey) {
+            const dayNotes = notes[dateKey] || [];
+            if (dayNotes.length === 0) return '';
+            
+            // Берем последнюю добавленную заметку (самую новую)
+            const lastNote = dayNotes[dayNotes.length - 1];
+            const noteText = lastNote.text;
+            
+            // Обрезаем текст если он слишком длинный
+            if (noteText.length > 50) {
+                return noteText.substring(0, 47) + '...';
+            }
+            
+            return noteText;
+        }
+        
+        // Форматирование даты для отображения
+        function formatDate(date) {
+            const day = date.getDate();
+            const month = getMonthName(date.getMonth());
+            const year = date.getFullYear();
+            const dayOfWeek = getDayName(date.getDay());
+            
+            return `${day} ${month} ${year}, ${dayOfWeek}`;
+        }
+        
+        // Показать уведомление
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = notification.querySelector('.notification-text');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            // Скрыть уведомление через 3 секунды
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Открыть модальное окно для редактирования заметки
+        function openEditModal(noteIndex, dateKey) {
+            currentEditNoteIndex = noteIndex;
+            currentEditDateKey = dateKey;
+            
+            const dayNotes = notes[dateKey] || [];
+            if (dayNotes.length <= noteIndex) return;
+            
+            const noteText = dayNotes[noteIndex].text;
+            document.getElementById('edit-note-text').value = noteText;
+            
+            const modal = document.getElementById('edit-modal');
+            modal.classList.add('active');
+            
+            // Фокус на текстовое поле
+            setTimeout(() => {
+                document.getElementById('edit-note-text').focus();
+            }, 100);
+        }
+        
+        // Закрыть модальное окно для редактирования заметки
+        function closeEditModal() {
+            const modal = document.getElementById('edit-modal');
+            modal.classList.remove('active');
+            currentEditNoteIndex = -1;
+            currentEditDateKey = '';
+            document.getElementById('edit-note-text').value = '';
+        }
+        
+        // Сохранить отредактированную заметку
+        function saveEditedNote() {
+            const editedText = document.getElementById('edit-note-text').value.trim();
+            
+            if (editedText === '') {
+                alert('Заметка не может быть пустой');
+                return;
+            }
+            
+            if (currentEditNoteIndex === -1 || !currentEditDateKey) return;
+            
+            const dayNotes = notes[currentEditDateKey];
+            if (!dayNotes || dayNotes.length <= currentEditNoteIndex) return;
+            
+            // Обновляем текст заметки
+            dayNotes[currentEditNoteIndex].text = editedText;
+            dayNotes[currentEditNoteIndex].timestamp = new Date().toISOString();
+            
+            // Сохраняем изменения
+            saveNotes();
+            
+            // Обновляем интерфейс
+            renderCalendar();
+            renderNotes();
+            
+            // Показываем уведомление
+            showNotification('Заметка успешно отредактирована!');
+            
+            // Закрываем модальное окно
+            closeEditModal();
+        }
+        
+        // Генерация календаря на месяц
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            const currentMonthElement = document.getElementById('current-month');
+            
+            // Очистка предыдущих дней (первые 7 ячеек - дни недели)
+            while (calendarGrid.children.length > 7) {
+                calendarGrid.removeChild(calendarGrid.lastChild);
+            }
+            
+            // Установка текущего месяца в заголовке
+            currentMonthElement.textContent = `${getMonthName(currentDate.getMonth())} ${currentDate.getFullYear()}`;
+            
+            // Первый день месяца
+            const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            // Последний день месяца
+            const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            // День недели первого дня месяца (0 - воскресенье, 1 - понедельник и т.д.)
+            let firstDayOfWeek = firstDayOfMonth.getDay();
+            // Преобразуем так, чтобы понедельник был 0
+            firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+            
+            // Количество дней в месяце
+            const daysInMonth = lastDayOfMonth.getDate();
+            
+            // Добавляем пустые ячейки для дней предыдущего месяца
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const prevMonthDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), -i);
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell other-month';
+                // Проверяем, является ли день выходным
+                if (isWeekend(prevMonthDay)) {
+                    dayCell.classList.add('weekend');
+                }
+                dayCell.innerHTML = `
+                    <div class="day-number">${prevMonthDay.getDate()}</div>
+                `;
+                calendarGrid.appendChild(dayCell);
+            }
+            
+            // Добавляем дни текущего месяца
+            const today = new Date();
+            const todayKey = getDateKey(today);
+            const selectedKey = getDateKey(selectedDate);
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const dateKey = getDateKey(date);
+                const isWeekendDay = isWeekend(date);
+                
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell';
+                
+                // Проверка, является ли день выходным
+                if (isWeekendDay) {
+                    dayCell.classList.add('weekend');
+                }
+                
+                // Проверка, является ли день сегодняшним
+                if (dateKey === todayKey) {
+                    dayCell.classList.add('today');
+                }
+                
+                // Проверка, является ли день выбранным
+                if (dateKey === selectedKey) {
+                    dayCell.classList.add('selected');
+                }
+                
+                // Получаем заметки для этого дня
+                const dayNotes = notes[dateKey] || [];
+                const notesCount = dayNotes.length;
+                const notePreview = getFirstNotePreview(dateKey);
+                
+                dayCell.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    ${notesCount > 0 ? `<div class="day-notes-preview">${notePreview}</div>` : ''}
+                    ${notesCount > 1 ? `<div class="notes-count">${notesCount}</div>` : ''}
+                `;
+                
+                // Обработчик клика по дню
+                dayCell.addEventListener('click', () => {
+                    selectedDate = date;
+                    renderCalendar();
+                    renderNotes();
+                });
+                
+                calendarGrid.appendChild(dayCell);
+            }
+            
+            // Добавляем дни следующего месяца до конца сетки
+            const totalCells = 42; // 6 строк по 7 дней
+            const daysAdded = firstDayOfWeek + daysInMonth;
+            const nextMonthDays = totalCells - daysAdded;
+            
+            for (let i = 1; i <= nextMonthDays; i++) {
+                const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, i);
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell other-month';
+                // Проверяем, является ли день выходным
+                if (isWeekend(nextMonthDate)) {
+                    dayCell.classList.add('weekend');
+                }
+                dayCell.innerHTML = `
+                    <div class="day-number">${i}</div>
+                `;
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+        
+        // Отображение заметок для выбранной даты
+        function renderNotes() {
+            const selectedDateElement = document.getElementById('selected-date');
+            const notesList = document.getElementById('notes-list');
+            const noteInput = document.getElementById('note-input');
+            
+            // Установка выбранной даты
+            selectedDateElement.textContent = formatDate(selectedDate);
+            
+            // Очистка списка заметок
+            notesList.innerHTML = '';
+            
+            // Получение заметок для выбранной даты
+            const dateKey = getDateKey(selectedDate);
+            const dayNotes = notes[dateKey] || [];
+            
+            // Если нет заметок, показываем сообщение
+            if (dayNotes.length === 0) {
+                notesList.innerHTML = '<div class="empty-notes">Нет заметок для этого дня. Добавьте первую заметку!</div>';
+                return;
+            }
+            
+            // Отображение заметок в обратном порядке (новые сверху)
+            dayNotes.reverse().forEach((note, index) => {
+                const noteItem = document.createElement('div');
+                noteItem.className = 'note-item';
+                
+                // Форматирование времени заметки
+                const noteDate = new Date(note.timestamp);
+                const timeString = noteDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Вычисляем реальный индекс (так как отображаем в обратном порядке)
+                const realIndex = dayNotes.length - 1 - index;
+                
+                noteItem.innerHTML = `
+                    <div class="note-text">
+                        ${note.text}
+                        <div class="note-date">${timeString}</div>
+                    </div>
+                    <div class="note-actions">
+                        <button class="edit-note-btn no-print" data-index="${realIndex}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-note-btn no-print" data-index="${realIndex}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Обработчик редактирования заметки
+                const editBtn = noteItem.querySelector('.edit-note-btn');
+                editBtn.addEventListener('click', function() {
+                    const noteIndex = parseInt(this.getAttribute('data-index'));
+                    openEditModal(noteIndex, dateKey);
+                });
+                
+                // Обработчик удаления заметки
+                const deleteBtn = noteItem.querySelector('.delete-note-btn');
+                deleteBtn.addEventListener('click', function() {
+                    const noteIndex = parseInt(this.getAttribute('data-index'));
+                    deleteNote(noteIndex);
+                });
+                
+                notesList.appendChild(noteItem);
+            });
+            
+            // Очистка поля ввода
+            noteInput.value = '';
+        }
+        
+        // Добавление новой заметки
+        function addNote() {
+            const noteInput = document.getElementById('note-input');
+            const noteText = noteInput.value.trim();
+            
+            if (noteText === '') {
+                alert('Введите текст заметки');
+                return;
+            }
+            
+            const dateKey = getDateKey(selectedDate);
+            
+            // Создаем массив для заметок этой даты, если его нет
+            if (!notes[dateKey]) {
+                notes[dateKey] = [];
+            }
+            
+            // Добавляем новую заметку
+            notes[dateKey].push({
+                text: noteText,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Сохраняем заметки
+            saveNotes();
+            
+            // Обновляем интерфейс
+            renderCalendar();
+            renderNotes();
+            
+            // Показываем уведомление
+            showNotification('Заметка успешно добавлена!');
+            
+            // Фокус на поле ввода
+            noteInput.focus();
+        }
+        
+        // Удаление заметки
+        function deleteNote(index) {
+            const dateKey = getDateKey(selectedDate);
+            
+            if (notes[dateKey] && notes[dateKey].length > index) {
+                // Удаляем заметку
+                notes[dateKey].splice(index, 1);
+                
+                // Если массив пуст, удаляем ключ
+                if (notes[dateKey].length === 0) {
+                    delete notes[dateKey];
+                }
+                
+                // Сохраняем изменения
+                saveNotes();
+                
+                // Обновляем интерфейс
+                renderCalendar();
+                renderNotes();
+                
+                // Показываем уведомление
+                showNotification('Заметка удалена!');
+            }
+        }
+        
+        // Функция печати календаря с сотрудниками
+        function printCalendar() {
+            // Создаем контент для печати
+            const printWindow = window.open('', '_blank');
+            
+            // Получаем данные для печати
+            const monthName = getMonthName(currentDate.getMonth());
+            const year = currentDate.getFullYear();
+            const today = new Date().toLocaleDateString('ru-RU');
+            
+            // Создаем HTML для печати
+            let printHTML = `
+                <!DOCTYPE html>
+                <html lang="ru">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Календарь ${monthName} ${year}</title>
+                    <style>
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            color: #333;
+                            padding: 10px;
+                            font-size: 12px;
+                        }
+                        .print-content {
+                            display: flex;
+                            flex-direction: column;
+                            width: 100%;
+                        }
+                        .print-header {
+                            text-align: center;
+                            margin-bottom: 10px;
+                            border-bottom: 2px solid #3498db;
+                            padding-bottom: 8px;
+                        }
+                        .print-title {
+                            font-size: 1.2rem;
+                            font-weight: bold;
+                            color: #2c3e50;
+                            margin-bottom: 5px;
+                        }
+                        .print-date {
+                            font-size: 1rem;
+                            color: #7f8c8d;
+                        }
+                        .calendar-print {
+                            display: grid;
+                            grid-template-columns: repeat(7, 1fr);
+                            gap: 4px;
+                            margin-bottom: 15px;
+                        }
+                        .day-name-print {
+                            text-align: center;
+                            padding: 8px 2px;
+                            font-weight: 600;
+                            background-color: #f0f0f0;
+                            border-radius: 2px;
+                            font-size: 0.8rem;
+                        }
+                        .day-name-print.weekend {
+                            background-color: #ffeaea;
+                            color: #e74c3c;
+                        }
+                        .day-cell-print {
+                            border: 1px solid #ddd;
+                            padding: 6px 3px;
+                            min-height: 70px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: flex-start;
+                            position: relative;
+                            page-break-inside: avoid;
+                            background-color: #f8f9fa;
+                            font-size: 0.75rem;
+                        }
+                        .day-cell-print.weekend {
+                            background-color: #fff5f5;
+                        }
+                        .day-number-print {
+                            font-size: 0.9rem;
+                            font-weight: 600;
+                            margin-bottom: 3px;
+                        }
+                        .notes-preview-print {
+                            font-size: 0.65rem;
+                            color: #7f8c8d;
+                            text-align: left;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            display: -webkit-box;
+                            -webkit-line-clamp: 3;
+                            -webkit-box-orient: vertical;
+                            flex-grow: 1;
+                        }
+                        .notes-count-print {
+                            background-color: #2ecc71;
+                            color: white;
+                            border-radius: 50%;
+                            width: 16px;
+                            height: 16px;
+                            font-size: 0.6rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            position: absolute;
+                            top: 3px;
+                            right: 3px;
+                        }
+                        .day-cell-print.weekend .notes-count-print {
+                            background-color: #e74c3c;
+                        }
+                        .employees-container {
+                            display: flex;
+                            flex-direction: column;
+                            margin-top: 15px;
+                            page-break-inside: avoid;
+                        }
+                        .employees-title {
+                            font-weight: bold;
+                            margin-bottom: 8px;
+                            border-bottom: 1px solid #3498db;
+                            padding-bottom: 5px;
+                            font-size: 0.9rem;
+                        }
+                        .employees-list {
+                            display: grid;
+                            grid-template-columns: repeat(4, 1fr);
+                            gap: 4px;
+                        }
+                        .employee-item {
+                            font-size: 0.7rem;
+                            padding: 3px;
+                            border-bottom: 1px dotted #ddd;
+                        }
+                        .print-footer {
+                            text-align: center;
+                            margin-top: 15px;
+                            font-size: 0.7rem;
+                            color: #7f8c8d;
+                            border-top: 1px solid #eee;
+                            padding-top: 8px;
+                        }
+                        @media print {
+                            body {
+                                padding: 5px;
+                                margin: 0;
+                            }
+                            .print-content {
+                                max-height: 100vh;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-content">
+                        <div class="print-header">
+                            <div class="print-title">Календарь с заметками</div>
+                            <div class="print-date">${monthName} ${year}</div>
+                        </div>
+                        
+                        <div class="calendar-print">
+                            <div class="day-name-print">Пн</div>
+                            <div class="day-name-print">Вт</div>
+                            <div class="day-name-print">Ср</div>
+                            <div class="day-name-print">Чт</div>
+                            <div class="day-name-print">Пт</div>
+                            <div class="day-name-print weekend">Сб</div>
+                            <div class="day-name-print weekend">Вс</div>
+            `;
+            
+            // Добавляем дни в календарь для печати
+            // Первый день месяца
+            const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            // Последний день месяца
+            const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            // День недели первого дня месяца (0 - воскресенье, 1 - понедельник и т.д.)
+            let firstDayOfWeek = firstDayOfMonth.getDay();
+            // Преобразуем так, чтобы понедельник был 0
+            firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+            
+            // Количество дней в месяце
+            const daysInMonth = lastDayOfMonth.getDate();
+            
+            // Добавляем пустые ячейки для дней предыдущего месяца
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                printHTML += `<div class="day-cell-print"></div>`;
+            }
+            
+            // Добавляем дни текущего месяца
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const dateKey = getDateKey(date);
+                const isWeekendDay = isWeekend(date);
+                
+                // Количество заметок для этого дня
+                const dayNotes = notes[dateKey] || [];
+                const notesCount = dayNotes.length;
+                const notePreview = getFirstNotePreview(dateKey);
+                
+                printHTML += `
+                    <div class="day-cell-print${isWeekendDay ? ' weekend' : ''}">
+                        <div class="day-number-print">${day}</div>
+                        ${notesCount > 0 ? `<div class="notes-preview-print">${notePreview}</div>` : ''}
+                        ${notesCount > 1 ? `<div class="notes-count-print">${notesCount}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            // Добавляем список сотрудников
+            printHTML += `
+                        </div>
+                        
+                        <div class="employees-container">
+                            <div class="employees-title">Список сотрудников</div>
+                            <div class="employees-list">
+            `;
+            
+            // Добавляем сотрудников в 4 колонки
+            employeesList.forEach((employee, index) => {
+                printHTML += `<div class="employee-item">${employee}</div>`;
+            });
+            
+            printHTML += `
+                            </div>
+                        </div>
+                        
+                        <div class="print-footer">
+                            <p>Распечатано: ${today}</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // Открываем окно для печати
+            printWindow.document.open();
+            printWindow.document.write(printHTML);
+            printWindow.document.close();
+            
+            // Даем время на загрузку контента и затем печатаем
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+        
+        // Инициализация приложения
+        function initApp() {
+            // Загружаем заметки
+            loadNotes();
+            
+            // Рендерим календарь и заметки
+            renderCalendar();
+            renderNotes();
+            
+            // Обработчики кнопок навигации
+            document.getElementById('prev-month').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+            
+            document.getElementById('next-month').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+            
+            // Обработчик кнопки добавления заметки
+            document.getElementById('add-note-btn').addEventListener('click', addNote);
+            
+            // Обработчик кнопки печати
+            document.getElementById('print-btn').addEventListener('click', printCalendar);
+            
+            // Обработчик нажатия Enter в поле ввода
+            document.getElementById('note-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    addNote();
+                }
+            });
+            
+            // Обработчики для модального окна редактирования
+            document.getElementById('close-modal').addEventListener('click', closeEditModal);
+            document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+            document.getElementById('save-edit').addEventListener('click', saveEditedNote);
+            
+            // Закрытие модального окна при клике на оверлей
+            document.getElementById('edit-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'edit-modal') {
+                    closeEditModal();
+                }
+            });
+            
+            // Закрытие модального окна при нажатии Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeEditModal();
+                }
+            });
+            
+            // Выбор сегодняшней даты при загрузке
+            selectedDate = new Date();
+        }
+        
+        // Запускаем приложение после загрузки страницы
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
